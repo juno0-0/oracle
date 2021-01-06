@@ -1,0 +1,71 @@
+데이터의 무결성
+ - 데이터를 모아놓고 중복을 제거하는 방식에서 결함을 없앰
+      중복된 데이터는 지우고 다른 테이블의 데이터를 참조하는 방식
+
+JOIN
+ - 2개 이상의 참조 관계인 테이블을 합치는 작업
+ - 기본키와 외래키로 참조 관계를 맺은 테이블들은 부모테이블과 자식테이블로 나눈다.
+       부모테이블 : 기본키를 가지고 있는 테이블
+       자식테이블 : 외래키로 기본키를 참조하는 테이블
+       보통 부모테이블과 자식테이블은 1:N 관계
+       하지만 부모와 자식은 상대적이라서 자식테이블이 다른 테이블의 부모테이블이 될 수도 있다.
+
+ANSI JOIN의 종류
+ - INNER JOIN
+   · 관계가 있는 데이터끼리만 합침
+   · SELECT * FROM A테이블명 [INNER] JOIN B테이블명 ON A.칼럼명 = B.칼럼명;
+	A.칼럼명 = B.칼럼명 ← 이 조건이 만족하는 데이터만 JOIN
+			     조건을 만족하지 않는 데이터는 누락
+	부모테이블과 자식테이블 양쪽에서 OUTER를 제거하면
+   	자식의 레코드수가 곧 INNER JOIN 했을 때 결과로 나오는 레코드 수와 똑같다.
+
+ - OUTER JOIN
+   · 참조키를 기준으로 일치하지 않는 행도 포함시키는 조인
+   · 공통으로 가지고 있지 않은 레코드를 OUTER라고 부름
+   · SELECT * FROM A테이블명 LEFT/RIGHT/FULL OUTER JOIN B테이블명
+	ON A.칼럼명 = B.칼럼명;
+   · LEFT : 왼쪽에 있는 OUTER를 포함시켜 주겠다. 
+	    왼쪽 테이블의 모든 레코드를 출력,
+	    OUTER는 NULL을 넣어서 출력
+   · RIGHT : 오른쪽에 있는 OUTER를 포함시켜 주겠다.
+	    오른쪽 테이블의 모든 레코드를 출력,
+	    OUTER는 NULL을 넣어서 출력
+   · FULL : 양쪽의 모든 OUTER를 포함시켜 주겠다.
+	    양쪽 테이블의 모든 레코드를 출력,
+	    OUTER는 NULL을 넣어서 출력
+
+내부 조인 연습
+ - 조인된 테이블 쿼리하기
+   · 게시글의 컬럼명을 식별하기 위해 테이블명을 사용
+     모호성을 제거한다.
+     SELECT A테이블명.ID, A테이블명.NAME, B테이블명.NAME FROM
+	A테이블명 [INNER] JOIN B테이블명 ON A테이블명.ID = B테이블명.ID;
+
+   · 컬럼을 지정하는 식별자를 줄이기 위해 테이블의 별칭 사용
+     SELECT a.ID, a.WRITER_ID, b.name FROM
+	A테이블명 a [INNER] JOIN B테이블명 b ON a.ID = b.WRITER_ID;
+	단, 별칭을 부여하면 테이블명을 사용할 수 없다.
+
+   · ID, NAME, 회원별 작성한 게시글 수를 조회하기
+     SELECT a.ID, a.NAME, COUNT(b.ID) FROM
+	A테이블명 a [INNER] JOIN B테이블명 b ON a.ID = b.WRITER_ID
+		GROUP BY a.ID, a.NAME
+		이렇게하면 글을 등록하지 않은 사람은 누락된다.
+			↓
+     SELECT a.ID, a.NAME, COUNT(b.ID) FROM
+	A테이블명 a LEFT OUTER JOIN B테이블명 b ON a.ID = b.WRITER_ID
+		GROUP BY a.ID, a.NAME
+
+ - SELF JOIN
+   · 모든 JOIN은 INNER JOIN과 OUTER JOIN만 있음.
+        SELF JOIN은 개념상으로 JOIN인 것
+   · 자기가 자기를 합치는 것
+        (같은 테이블끼리 합치는 것)
+        ex) 하나의 테이블에 부장, 과장, 팀장, 대리, 사원이 있을 경우
+	    부장과 부장의 부하직원 or 대리와 대리의 상사를 출력하고 싶을 때
+   · SELECT * FROM A테이블명 A LEFT OUTER JOIN A테이블명 A2 
+	ON B.칼럼명 = A.칼럼명;
+
+
+
+ - CROSS JOIN(Cartesian Product, 곱집합)
