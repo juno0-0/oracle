@@ -1,0 +1,112 @@
+1. 화면설계
+2. 데이터베이스 설계
+3. 화면과 데이터베이스 연결
+4. SQL문을 Java에서 코딩
+5. 예외처리하기
+
+RGB 0~255, 0~ff(255를 16진수로 표현)
+      0이면 다 꺼놓은 것
+      255면 다 켜놓은 것
+      빨간색을 하고 싶으면 255, 0, 0
+      초록색을 하고 싶으면 0, 255, 0
+      파란색을 하고 싶으면 0, 0, 255
+      검은색을 하고 싶으면 0, 0, 0
+      하얀색을 하고 싶으면 255, 255, 255
+      색을 조금씩 섞어서 다른 색을 표현하는 것
+      빛의 3원색
+
+lblTitle.setForeground(new Color(123,54,32));//라벨에 색을 넣는 것
+lblStatus.setBackground(Color.LIGHT_GRAY);//라벨에 색을 넣는 것2
+둘 중 아무거나 사용
+
+WindowListener = x버튼이나 최소화버튼 등을 눌렀는지 감지하는 것
+WindowListener에 있는 추상메소드들
+@Override
+public void windowOpened(WindowEvent e) {}
+			
+@Override
+public void windowIconified(WindowEvent e) {}
+			
+@Override
+public void windowDeiconified(WindowEvent e) {}
+			
+@Override
+public void windowDeactivated(WindowEvent e) {}//커서가 깜빡이지 않는 상황, 비활성화
+			
+@Override
+public void windowClosing(WindowEvent e) {}//닫기 버튼을 누르는 순간 동작
+			
+@Override
+public void windowClosed(WindowEvent e) {}//닫기 버튼을 누르고 나면 동작, 일반적으로 이걸 씀
+//Closing와 Closed는 거의 똑같음
+			
+@Override
+public void windowActivated(WindowEvent e) {}//커서가 깜빡이는 상황, 활성화
+
+WindowAdapter() = WindowListener를 클래스로 만들어놓은 것
+
+클릭하면 나오는 것 = EventListener
+다른 Listener들은 EventListener를 상속받음
+XXXListener = 누르면 동작하는 것
+
+JDBC(Java DateBase Connection)
+1. 데이터 베이스 사용할 준비, 연결서버, 오라클 설치.
+2. 오라클 드라이버 위치 
+ ** C:\oraclexe\app\oracle\product\11.2.0\server\jdbc\lib\ojdbc6.jar파일이 있다
+3. 드라이버를 설치 ~~ \lib\ext\ojdbc16.jar 복사해 넣는다.
+4. 이클립스의 build path로 오라클 설치 파일의C:\OracleDD\product\11.2.0\dbhome_1\jdbc\lib 로 한다.
+ - 프로젝트 하나당 JAR 하나씩 넣어줘야함
+ - 오라클을 연동할 때마다 계속 Build path 해야함
+5. java 코딩
+2,3번 대신에 4번만 해도 된다.
+2,3번을 하면 4번을 안해도 된다.
+
+
+a. 오라클 데이터베이스 연동을 위한 4가지 정보를 문자열에 저장 
+ String driver="oracle.jdbc.driver.OracleDriver";                     → 사용할 DB는 오라클 이다.
+ String url="jdbc:oracle:thin:@localhost:1521:orcl";        →  ip나 로컬 호스트로 연결. 
+ String userid="scott";                                    → 계정의 아이디와 비밀번호를 넣어서 연결시킴. 
+ String passwd="tiger";
+
+b. 드라이버 로딩 
+(OracleDriver 클래스를 자바에서 이용하기 위해서 JVM에 올려줌)
+  Class.forName(dirver);      
+
+c. Connection 맺기
+  Connection con=DriverManager.getConnection(url, userid, passwd);
+
+d. Statement 생성
+요청할 SQL문을 전송하고 실행하는 클래스 
+ Statement stmt=con.createStatement();
+ 혹은 pstmt = con.prepareStatement(query);
+
+e. SQL문을 작성
+ String query="SELECT DEPTNO, DNAME, LOC FROM DEPT";         → 검색
+ String inquery="Insert into dept(deptno, dname, loc) values(10,'ghd', 'seoul');    → 삽입
+ String delete="DELETE FROM dept WHERE deptno=40";   → 삭제
+
+excute = 실행해라
+f. 전송한 후 DB에서 SQL문이 실행되고 결과를 담아 줄 것을 작성
+   1) DML 요청 (insert, delete, update)
+     executeUpdate 메소드 이용
+ int n=stmt.excuteUpdate(inquery);
+왜 int n으로 받았나? 처리결과가 "1행이 삽입됐습니다" 에서 1을 int n으로 받음
+   2) Select 요청
+    executeQuery 메소드 이용
+ ResultSet rs=stmt.excuteQuery(query)
+ResultSet으로 받는 이유는 query의 결과가 해당 레코드의 자료니까.
+ResultSet 객체 : DB의 자료를 자바로 표현하는 클래스 
+next(): 해당 레코드 선택
+   결과값인 ResultSet에서 데이터 얻는 방법
+ while(rs.next()){
+       int deptno = rs.geIInt("deptno");
+       String dname = rs.getString("dname");
+       String loc = rs.getString("loc");
+ System.out.println  
+
+g. 자원 반납
+파일 및 DB는 자바에서 사용하는 외부자원이기 때문에 반드시 사용한 후에는 자원을 해제 시켜야함.
+ rs.close();                 → ResultSet을 사용한 경우
+ stmt.close();              → Statement을 사용한 경우
+ con.close();               → Connect을 사용한 경우
+생성한 반대 순서로 끊어준다.

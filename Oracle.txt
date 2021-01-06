@@ -1,0 +1,652 @@
+DBMS(DataBase MAnagement System)
+ - 데이터 베이스를 관리해주는 프로그램
+ - 다수의 사용자들이 데이터베이스 내의 
+    데이터를 접근할 수 있도록 해주는 소프트웨어 도구의 집합
+
+Schema : 연관된 테이블들을 그룹핑하는 일종의 디렉토리(폴더)
+사용자 : 사용자를 생성하면 사용자에 속하는 스키마가 만들어지고
+	  사용자는 그 안에 있는 테이블에 접속할 수 있음
+※ 사용자 = 스키마는 아니지만 둘은 항상 세트
+
+SQL(Structured Query Language)
+ - 데이터 베이스에 명령을 주는 것
+       구조화된 정보를 처리하도록 요청하는 컴퓨터 언어
+ - 엑셀보다 불편하고 어려운데 DB를 사용하는 이유
+   · 물리적 한계
+        엑셀은 물리적으로 많은 데이터를 넣기가 힘들다. 최대 65000여개
+
+   · 명령어를 통해 DB를 제어할 수 있다
+        명령어를 컴퓨터 프로그램을 통해 데이터를 자동적으로 만들 수 있다.
+        명령어를 통해 데이터를 가공하고 가치있는 무언가를 만드는 것을 자동화 할 수 있다.
+
+SQL 명령어의 유형
+ - DQL(Data Query Language, 질의어)
+   · SELECT : 데이터 검색시 사용★★★
+ 
+ - DML(Data Manipulation Language, 데이터 조작어)
+   · INSERT : 데이터 입력
+   · UPDATE : 데이터 수정
+   · DELETE : 데이터 삭제
+
+ - DDL(Data Definition Language, 데이터 정의어)
+   · CREATE : 데이터베이스 생성
+   · ALTER : 데이터베이스 변경, 기존의 테이블 수정(추가, 크기변경 등)
+   · DROP : 데이터베이스 삭제, 테이블 자체를 삭제
+   · TRUNCATE : 데이터베이스 저장 공간 삭제, 
+                     테이블에 저장된 모든 내용을 삭제(테이블은 남아있음)
+   · RENAME : 데이터베이스 객체이름 변경, 테이블 이름 변경
+
+ - TCL(Transaction Control Language, 트랙잭션 처리어)
+ ※ Transaction : 데이터베이스의 상태를 변화시키기 위해 수행하는 작업의 단위
+   · COMMIT : 트랜잭션의 정상적인 종료처리, 변경된 내용을 영구 저장
+   · ROLLBACK : 트랜잭션 취소, 변경되기 이전 상태로 되돌림
+   · SAVEPOINT : 트랜잭션 내에 세이브포인트 설정
+
+ - DCL(Data Control Language, 데이터 제어어)
+   · GRANT : 데이터베이스에 대한 일련의 권한 부여
+   · REVOKE : 데이터베이스에 대한 일련의 권한 취소
+
+사용자 계정 만들기
+ - CREATE USER 사용자ID IDENTIFIEN BY 사용자PW;
+
+역할 부여하기
+ - GRANT 키워드를 사용
+ - connect : 접속할 수 있는 권한을 줌
+ - resource : DDL 권한을 줌
+ - 사용자 계정 만들기와 역할 부여 권한은 system에게만 있다.
+
+데이터 타입
+ - CHAR(size)
+   · size 크기의 고정 길이 문자 데이터 타입
+     크기를 10으로 지정하고 지정된 길이보다 짧은 데이터가 입력되면
+     남은 칸은 공백으로 채워짐
+   · 최대타입 : 2000바이트
+   · 최소타입 : 1바이트
+
+ - VARCHAR2(size)
+   · size 크기의 가변 길이 문자 데이터 타입
+     크기를 50으로 줘도 저장되는 데이터의 길이가 6이면
+     길이가 6만 할당된다.
+   · 최대타입 : 4000바이트
+   · 최소타입 : 1바이트
+   · 한글은 2바이트
+
+ - NVARCHAR2(size)
+   · 국가별 문자 집합에 따른 size 크기의 
+   · 문자 또는 바이트의 가변 길이 문자 데이터 타입
+     크기를 50으로 줘도 저장되는 데이터의 길이가 6이면
+     길이가 6만 할당된다.
+   · 최대크기 : 4000바이트
+   · 최소크기 : 1바이트
+
+ - NUMBER(p,s)
+   · p칸의 소수점 s자리
+     ex) number(8,2) : 000000.00
+          123456.789가 들어오면 반올림되서 123456.79가 들어감
+          정수가 넘치면 늘어남
+   · p : 1 ~ 38
+   · s : -84 ~ 127
+   · 매개변수가 없으면 가변 길이가 된다.
+
+ - DATE
+   · 날짜 형식을 저장하기 위한 데이터 타입
+   · 컬럼을 만들고 자료를 삽입할 때 
+     to_date('xxxx-xx-xx','yyyy-MM-dd') 이런 식으로 사용
+
+ - ROWID
+   · 데이터베이스에서 데이터마다의 주소를 의미
+   · 각각의 데이터를 구분할 수 있는 유일한 ID
+   · 구조
+     - 오브젝트 번호(32bit,6자리) : 해당 데이터가 속하는 오브젝트 번호
+		                   오브젝트별로 유일값을 가지고 있다.
+     - 상대 파일 번호(10bit,3자리) : 테이블스페이스는 여러 개의 DATAFILE을 생성할 수 있다.
+			        10bit이기 때문에 테이블스페이스당 1023개의 DATAFILE을 추가 가능
+			        DATAFILE은 해당 테이블스페이스의 상대 파일 번호를 의미
+			        각 데이터별로 유일한 값을 가짐
+     - 블록 번호(22bit,6자리) : 파일 안에 어느 블록인지 의미
+     - 데이터 번호(16bit,3자리) : 오브젝트 번호, 파일번호, 블록 번호가 같으면 데이터 번호는 
+			    블록별로 데이터가 저장되어 있는 순서를 의미
+     = 총 80bit(18자리) = 10byte
+
+ - BLOB
+   · 대용량의 바이너리 데이터를 저장하기 위한 데이터 타입
+   · 최대크기 : 4GB
+   · 이미지를 쓸 때 사용
+
+ - CLOB
+   · 대용량의 텍스트 데이터를 저장하기 위한 데이터 타입
+   · 최대크기 : 4GB
+             
+ - BFILE
+   · 대용량의 바이너리 데이터를 파일 형태로 저장하기 위한 데이터 타입
+   · 최대크기 : 4GB
+
+ - TIMESTAMP(n)
+   · DATE 데이터 타입의 확장된 형태
+   · n은 milli second 자리수로 최대 9자리까지 표현 가능
+
+ - INTERVAL YEAR TO MONTH
+   · 년과 월을 이용하여 기간을 저장
+ 
+ - INTERVAL DAY TO SECOND
+   · 일, 시, 분, 초를 이용하여 기간을 저장
+   · 두 날짜값의 정확한 차이를 표현하는데 유용
+
+SELETE문
+ - SQL의 가장 기본이 되는 문장
+ - 테이블에 있는 자료를 검색할 때나, 함수를 써서 데이터를 보여줄 때 사용
+
+ - SELECT 컬럼명 FROM 테이블명;이 기본 구조
+    [ ]는 생략 가능하다는 의미,
+    { , , }는 안에 있는 것 중 하나를 쓰면 된다는 의미
+   · SELECT * FROM 테이블명 : 테이블에 있는 모든 레코드 출력, * = ALL
+     만약 부분만 필요하면 SELECT 컬럼명1, 컬럼명2 FROM 테이블명;
+
+ - DISTINCT : 중복 제거
+    ex) SELECT DISTINCT job FROM emp;
+         emp 테이블의 job행에서 중복을 제거한 결과를 보여줌
+
+ - 연산이 필요한 경우
+    ex) SELECT sal, sal*0.03 FROM emp;
+         sal행과 sal행*0.03의 결과를 보여줌
+
+ - 컬럼에 들어있는 값이 NULL인 경우 연산이 불가능하기 때문에
+    NVL함수를 사용
+    ex) SELECT comm, sal*12+comm, NVL(comm,0),sal*12+NVL(comm,0) FROM emp;
+         comm의 값이 NULL이면 0을 넣어서 계산해라
+
+ - 컬럼에 별칭 부여하기
+   · as 뒤에 별칭을 쓰거나 그냥 별칭만 쓴다.
+   · " "로 별칭을 부여한다.
+   ex) SELECT DISTINCT job [as] 직위 FROM emp;
+        SELECT DISTINCT job "직위" FROM emp;
+
+ - Concatenation 연산자
+   · 여러 개의 컬럼을 연결할 때 사용
+     ||를 컬럼과 문자열 사이에 기술하여 하나로 연결
+     ex) SELECT ename || '의 직급은 '|| job || '입니다.' 직급 from emp;
+
+WHERE(조건절)
+ - 원하는 row만 얻으려면 로우를 제한하는 조건을 제시
+ - 비교 연산자
+   · = : 같다
+   · > : 크다
+   · < : 작다
+   · >= : 크거나 같다
+   · <= : 작거나 같다
+   · <>,!=,^= : 다르다
+   · 날짜의 경우 이 전이면 작은 것, 이 후면 큰 것
+
+ - 논리 연산자
+   · AND : 두 조건 모두 참인 것만 검색
+   · OR : 두 조건 중 하나만 참이어도 검색
+   · NOT : 두 조건 다 거짓인 것만 검색
+
+ - BETWEEN AND 연산자
+   · BETWEEN a AND b : a와 b 사이
+   · 특정 범위 내에 속하는 데이터인지 알아본다.
+     ex) SELECT * FROM emp where sal between 400 and 500;
+          SELECT * FROM emp where sal >= 400 and sal <= 500;과 같다.
+
+ - IN 연산자
+   · 특정 필드의 값이 A이거나 B이거나 C 중 하나만 만족하더라도 출력
+   · in() : ~안에
+     ex) SELECT * FROM emp where comm in(80,100,200);
+          SELECT * FROM emp where comm = 80 or comm = 100 or comm = 200;과 같다.
+
+ - LIKE 연산자와 와일드카드
+   · LIKE : 유사일치(비슷하게라도 일치하는 것)
+   · LIKE 다음에는 pattern을 기술해야 하는데 %와 _ 와일드카드가 있다.
+     - % : 문자가 없거나, 하나 이상의 어떤 문자가 와도 상관없음
+     - _ : 하나의 문자가 어떤 값이 와도 상관없음.
+     ※ 문자가 없어도 되는 경우 %, 꼭 1개는 있어야 하는 경우 _를 사용
+
+ - NULL인 값을 찾기 위한 IS NULL
+   · SELECT * FROM emp where comm is null;
+     comm의 값이 null인 것 찾기
+   · SELECT * FROM emp where comm is not null;
+     comm의 값이 null이 아닌 것 찾기
+
+ - 정렬을 위한 ORDER BY절
+   · ORDER BY 컬럼 : 컬럼을 기준으로 정렬
+   · asc : 오름차순, 생략 가능
+   · desc : 내림차순
+   · NULL의 경우 오름차순이면 가장 마지막에 출력
+	         내림차순이면 가장 먼저 출력
+   · 여러 가지 조건 제시
+     ex) 입사일이 느린 순으로 출력하되 입사일이 같으면 이름순으로 출력
+          SELECT * FROM emp order by hiredate desc, ename;
+
+집합 연산자
+ - UNION(합집합)
+   · select * from group_star UNION select * from single_star; (중복 x)
+   · select * from group_star UNION ALL select * from single_star; (중복 o)
+   · ALL이 붙으면 중복된 데이터까지 포함
+     UNION만 가지고 있다.
+
+ - DIFFERENCE(차집합)
+   · select * from group_star MINUS select * from single_star;
+
+ - INTERSECT(교집합)
+   · select * from group_star INTERSECT select * from single_star;
+ ※ 테이블 집합 테이블 순서
+
+Dual 테이블
+ - 바로 산술 연산의 결과를 한 줄로 얻음
+   · select * from dual; = X라는 결과가 나옴
+   · select 24*60 from dual; = 1440
+
+숫자 함수
+ - 숫자 데이터를 처리하기 위한 함수
+   · ABS : 절대값을 구함
+     - select ABS(-10) from dual; = 10
+
+   · COS : COSINE값을 반환
+
+   · EXP : e(2.71828183 ··· )의 n승을 반환
+
+   · FLOOR : 소수점 아래를 잘라버림
+     - select FLOOR(34.5678) from dual; = 34
+
+   · LOG : LOG 값을 반환
+
+   · POWER : POWER(m,n), m의 n승을 반환
+
+   · SIGN : SIGN(n) n<0이면 -1, n=0이면 0, n>0이면 1을 반환
+
+   · SIN : SINE 값을 반환
+
+   · TAN : TANGENT 값을 반환
+
+   · ROUND : 특정 자리수에서 반올림
+     - select round(3.83, 1) from dual; = 3.8
+        소수점 한자리까지 표시
+        소수점 2번째 자리를 반올림
+
+   · TRUNC : 특정 자리수에서 잘라버림
+     - select TRUNC(34.5678, 2) from dual; = 34.56
+     - select TRUNC(34.5678, -1) from dual; = 30
+     - select TRUNC(34.5678) from dual; = 34
+   ※ ROUND와 TRUNC에서 2번째 매개값이 음수면 1의 자리, 10의 자리, ...
+				      양수면 소수점 첫번째, 두번째, ...
+				       0이면 소수점 전체를 잘라버림
+
+   · MOD : 입력 받은 수를 나눈 나머지 값을 반환
+     - select mod(10, 3) from dual; = 1
+        10/3의 나머지
+        자바의 %와 같다.
+
+문자 처리 함수
+ - 문자형의 값을 조작하여 변환된 문자 값을 반환하는 함수
+ - 대 · 소문자간의 변환을 위한 함수와
+    문자열을 정교하게 조작하는 함수로 나뉨
+
+ - 대소문자 변환함수
+   · UPPER : 전부 대문자
+     - select UPPER('Welcome') from dual; = WELCOME
+   · LOWER : 전부 소문자
+     - select LOWER('wELcome') from dual; = welcome
+   · INITCAP : 첫 글자만 대문자, 나머지는 소문자
+     - select INITCAP('welcome') from dual; = Welcome
+
+ - 문자 길이를 구하는 함수
+   · LENGTH : 문자 길이를 반환(한글 1byte)
+     - select LENGTH('Oracle') from dual; = 6
+     - select LENGTH('오라클') from dual; = 3
+   · LENGTHB : 문자 길이를 바이트로 반환(한글 2 혹은 3byte)
+     - select LENGTHB('Oracle') from dual; = 6
+     - select LENGTHB('오라클') from dual; = 9
+
+ - 문자 조작 함수
+   · CONCAT : 문자끼리 연결
+     - select CONCAT('ab','cd') from dual; = 'abcd', 2개만 연결 가능
+
+   · SUBSTR : 문자를 잘라서 추출(한글 1byte)
+     - select SUBSTR('Welcome to Oracle', 2, 3) from dual; = 'elc'
+
+   · SUBSTRB : 문자를 잘라서 추출(한글 2~3byte)
+     - select SUBSTRB('가나다라마바사', 2, 5) from dual = 나
+        2바이트부터 5바이트 읽기
+        완벽하게 3바이트가 포함된 글자만 출력
+        가는 2,3만 포함되고 1이 포함되지 않아서 출력이 안된 것
+        나는 4,5,6이 포함되서 출력
+
+   · INSTR : 특정 문자의 위치 값을 반환(한글 1byte)
+     - select INSTR('데이터베이스', '이', 4, 1) from dual; = 5
+       매개값은 대상, 찾을 글자, 시작 위치, 시작위치부터 몇번째에 있는 것
+
+   · INSTRB : 특정 문자의 위치 값을 반환(한글 2~3byte)
+     - select INSTRB('데이터베이스', '이', 4, 1) from dual; = 4
+        4바이트부터 '이'가 있는 바이트의 시작 바이트 수를 리턴
+        4바이트에서 시작해서 '이'가 4바이트에 있으니 4,5,6바이트 중 4바이트를 반환
+
+   · LPAD, RPAD : 입력 받은 문자열과 기호를 정렬하여 특정 길이의 문자열로 반환
+     - select LPAD('Oracle', 20, '#') from dual; = ##############Oracle
+        자리를 20칸 마련하고 데이터를 오른쪽부터 채우고 남은 칸은 #으로 채움
+        왼쪽에서 값이 들어오고 나머지는 기호로 채움
+     - select RPAD('Oracle', 20, '#') from dual; = Oracle##############
+        자리를 20칸 마련하고 데이터를 왼쪽부터 채우고 남은 칸은 #으로 채움
+        오른쪽에서 값이 들어오고 나머지는 기호로 채움
+
+ - 형변환 함수
+   · 자료형을 변환시키고자 할 때 사용
+   · TO_CHAR : 날짜형 or 숫자형을 문자형으로 변환
+     - TO_CHAR(날짜 데이터, '출력형식')
+     - 날짜 출력 형식
+       · YYYY : 년도 표현(4자리)
+       · YY :  년도 표현(2자리)
+       · MM : 월을 숫자로 표현
+       · MON : 월을 알파벳으로 표현
+       · DAY : 요일 표현
+       · DY : 요일을 약어로 표현
+     ex) select sysdate, to_char(sysdate,'yyyy/MM/dd') from dual;
+          sysdate : 컴퓨터의 현재 시간을 가져오는 것
+     - 시간 출력 형식
+       · AM or PM : 오전, 오후 시각 표시
+       · HH or HH12 : 시간(1~12)
+       · HH24 : 시간(0~23)
+       · MI : 분 표현
+       · SS : 초 표현
+     ex) select sysdate, to_char(sysdate,'yyyy/MM/dd, AM HH:MI:SS') from dual;
+     - 숫자형을 문자형으로 변환
+       · 0 : 자릿수를 나타내며 자릿수가 맞지 않을 경우 0으로 채움
+       · 9 : 자릿수를 나타내며 자릿수가 많지 않을 경우 공백
+       · L : 각 지역별 통화 기호
+       · . : 소수점
+       · , : 천 단위 자리 구분
+     ex) select to_char(123400, 'L999,999,999') from dual; = \123,400
+
+   · TO_DATE : 문자형을 날짜형으로 변환
+     - TO_DATE('문자', 'format')
+     ex) select to_date(sysdate,'yyyy/MM/dd') from dual;
+          sysdate 자리에 문자형으로 임의의 날짜를 지정할 수 있음
+
+   · TO_NUMBER : 문자형을 숫자형으로 변환
+     - select to_number('199999') from dual;
+   ※ 단 문자형이 숫자로만 이루어져 있어야 TO_DATE나 TO_NUMBER로 변환 가능
+
+ - 날짜 함수
+   · DATE형에 사용하는 함수
+   · 결과 값으로 날짜 또는 시간을 얻음
+     - SYSDATE : 시스템에 저장된 현재 날짜를 반환
+
+     - MONTHS_BETWEEN : 날짜와 날짜 사이의 개월 수를 구함
+       · select ename, sysdate 오늘, to_char(hiredate, 'yyyy/mm/dd')
+                                          , trunc(MONTHS_BETWEEN(sysdate, hiredate)) from emp;
+
+     - ADD_MONTHS : 특정 개월 수를 더한 날짜를 구함
+       · select ename, to_char(add_months(hiredate, 6), 'yyyy-mm-dd') from emp;
+         hiredate에 6개월을 더한 값을 출력
+
+     - NEXT_DAY : 해당 요일의 가장 가까운 날짜를 반환
+       · select to_char(sysdate, 'yyyy/mm/dd'), to_char(NEXT_DAY(sysdate, 'MONDAY'),'yyyy/mm/dd') from dual;
+         이렇게 사용하면 오류 발생
+         현재 컴퓨터 시스템의 국가형식이 대한민국이라서 영어요일은 오류 발생
+         한국 요일이나 숫자를 사용해야 한다(일=1, 월=2, ...) 
+       · select to_char(sysdate, 'yyyy/mm/dd') 오늘,
+                 to_char(next_day(sysdate,'월'),'yyyy/mm/dd') 월요일
+                 from dual;
+       · select to_char(sysdate, 'yyyy/mm/dd') 오늘,
+                 to_char(next_day(sysdate,2),'yyyy/mm/dd') 월요일
+                 from dual;
+
+     - LAST_DAY : 각 월의 마지막 날짜를 반환
+       · select ename, to_char(hiredate,'yyyy/mm/dd'), to_char(last_day(hiredate), 'yyyy/mm/dd') from emp;
+
+     - ROUND : 인자로 받은 날짜를 특정 기준으로 반올림
+       · ROUND(date, format)
+       · 숫자 이외에 날짜에 대해서도 반올림 가능
+         - CC, SCC : 4자리 연도의 끝 두 글자를 기준으로 반올림
+         - SYYY, YYYY, YEAR, SYEAR, YYY, YY, Y : 년(7월 1일부터 반올림)
+         - DDD, D, J : 일을 기준
+         - HH, HH12, HH24 : 시를 기준
+         - Q : 한 분기의 두 번째 달의 16일을 기준으로 반올림
+         - MONTH, MON, MM, RM : 월(16일을 기준)
+         - DAY, DY, D : 한 주가 시작되는 날짜
+         - MI : 분을 기준   
+       · select to_char(hiredate, 'yyyy/mm/dd') 입사일, to_char(round(hiredate, 'YEAR'),'yyyy/mm/dd') 입사일 from emp;
+
+     - TRUNC : 인자로 받은 날짜를 특정 기준으로 버림
+       · TRUNC(date, format)
+       · select TO_CHAR(TRUNC(hiredate, 'MONTH'), 'yyyy/MM/dd') from emp;
+
+NULL을 다른 값으로 변환하는 함수
+ - NVL 함수는 NULL을 0 또는 다른 값으로 변환
+   · NVL(expr1, expr2) = expr1이 null이면 expr2로 반환
+   · NVL2(expr1, expr2, expr3) = expr1이 null이 아니면 expr2를 반환, null이면 expr3를 반환
+
+ - NULLIF : 두 표현식을 비교하여 동일하면 null, 다르면 첫번째 값을 반환
+   · NULLIF(expr1, expr2)
+     동일하지 않으면 expr1 반환
+     동일하면 null 반환
+   · ex) select nullif('a','a'),nullif('a','b') from dual; = null, a
+
+
+ - COALESCE 함수
+   · null이 아닌 첫 번째 인수를 반환
+   · null을 빼고 첫번째로 나오는 값
+   · ex) select coalesce('a','b','c','d') from dual; = a
+         select coalesce('a','b',null,'c','d') from dual; = a
+         select coalesce('a','b','c',null,'d') from dual; = a
+
+DECODE 함수
+ - switch case 문과 같은 기능
+   · select ename, deptno, decode(deptno, 10, '경리부',
+                                                       20, '인사과',
+                                                       30, '영업부',
+                                                       40, '전산부',
+                                                       deptno) from emp; 
+  				       ↑어디에도 포함되지 않는 경우
+
+
+조건에 따라 서로 다른 처리가 가능한 CASE
+ - CASE는 다양한 비교 연산자를 이용하여 조건을 제시할 수 있으므로 
+    범위를 지정할 수도 있음
+ - if else-if else와 유사한 구조
+   · case when 기준 = 값 then 출력할 결과
+   · select ename, deptno, 
+     case when deptno = 10 then '경리부'
+            when deptno = 20 then '인사부'
+            when deptno = 30 then '영업부'
+            when deptno = 40 then '전산부'
+            end as dname from emp;
+
+그룹 함수
+ - 단일행 함수는 값이 들어오면 들어온 갯수만큼 나감
+    그룹 함수는 값이 들어오면 종합해서 1개만 나감
+   · SUM : 그룹의 누적 합계를 반환
+   · AVG : 그룹의 평균을 반환
+   · COUNT : 그룹의 총 개수를 반환
+     - null 값은 세지 않음
+     - COUNT(*) : 테이블의 전체 로우(행) 수를 구함
+   · MAX : 그룹의 최대값
+   · MIN : 그룹의 최소값
+   · STDDEV : 그룹의 표준편차
+   · VARIANCE : 그룹의 분산을 반환
+
+Group by절
+ - 특정 컬럼을 기준으로 그룹 함수를 사용해야 할 경우
+     어떤 컬럼 값을 기준으로 그룹 함수를 적용해 줄지를 결정할 때 사용
+   · 부서별로 총합(부분합)
+      select deptno, sum(sal) from emp group by deptno;
+   · 직급별로 총합(부분합)
+      select job, sum(sal) from emp group by job;
+   · 부서별 직급이 사원인 사람들의 월급 총합
+      select deptno, sum(sal) from emp where job='사원' group by deptno;
+   · 김씨 성을 가진 사람들의 월급 평균
+      select job, avg(sal) from emp where ename like '김%' group by job;
+   · 입사일이 2000년부터 2003년 사이
+      select job, avg(sal) from emp where substr(hiredate, 1, 2) in('00','01','02','03') group by job;
+   · 부서번호, 최대값, 최소값을 구해서 최대값 오름차순으로 정렬
+      select deptno, max(sal), min(sal) from emp group by deptno order by max(sal);
+
+그룹 결과 제한 HAVING절
+ - SELECT절에 조건을 사용하여 그룹의 결과를 제한할 때 사용
+    (그냥 결과를 제한할 때는 WHERE절 사용)
+   · 평균이 500 이상만 출력
+      select deptno, avg(sal), max(sal), min(sal) from emp group by deptno having avg(sal) >= 500;
+
+※ select deptno, avg(sal), max(sal), min(sal) from emp group by deptno having avg(sal) >= 500 order by deptno;
+   순서가 정해져 있는것, 
+   검색 1등 WHERE조건절 2등 그룹 3등 HAVING조건절 4등 정렬 5등
+
+
+INSERT : 행 추가
+	INSERT INTO 테이블명[(컬럼명1, 컬럼명2, ... )] values(값1, 값2, ...);
+	NULL값 넣기 : 값으로 null을 주거나, 값으로 ''만 넣는다.
+	날짜 입력은 직접 쓰거나 TO_DATE를 사용
+
+UPDATE : 행 수정
+	 UPDATE 테이블명 SET 수정될컬럼명 = 수정될값 WHERE 컬럼명 = 값
+	 UPDATE는 WHERE절과 같이 사용
+	     (WHERE를 사용하지 않으면 모든 행이 수정된다.)
+	 연산도 가능하다
+	     UPDATE 테이블명 SET 컬럼명 = 컬럼명 + 100;
+
+DELETE : 행 삭제
+	DELETE [FROM] 테이블명 WHERE 컬럼명 = 값;
+	UPDATE와 마찬가지로 WHERE절과 같이 사용
+	WHERE절의 조건이 2개인 경우
+	    DELETE 테이블명 WHERE 컬럼명 = 값 and 컬럼명 = 값;
+	WHERE절의 조건에서 값이 null인 경우를 찾을 때 in null 사용
+	    DELETE 테이블명 WHERE 컬럼명 is null;
+
+오라클은 트랜잭션을 기반으로 데이터의 일관성을 보장한다.
+트랜잭션이란?
+ - 데이터 처리에서 논리적으로 하나의 작업 단위를 의미
+ - db시점에서는 커밋 롤백의 개념
+ - jdbc에서는 자바에서 sql문을 하나하나 보낼 때마다 자동커밋이 되기 때문에
+       자동커밋을 끄고 작업을 해서 마지막까지 정상 처리가 되면 수동 커밋을 한다.
+       중간에 문제가 생기면 롤백으로 작업 이전으로 돌아감.
+
+COMMIT : 모든 작업들을 정상적으로 처리하겠다고 확정하는 명령어
+
+ROLLBACK : 마지막 커밋 지점으로 돌아감
+
+데이터 무결성 제약조건
+ - 테이블에 부적절한 자료가 입력되는 것을 방지하는 것
+       테이블 생성시 각 컬럼에 대해 정의하는 여러가지 규칙
+ 1) NOT NULL : NULL을 허용하지 않음.
+ 2) UNIQUE : 중복을 허용하지 않음(유일한 값)
+ 3) PRIMARY KEY : NOT NULL + UNIQUE
+ 4) FOREIGN KEY : 참조되는 테이블의 컬럼에 같은 값이 존재하면 허용
+		    기본키에 있는 데이터만 외래키가 있는 테이블에 입력 가능
+		    외래키를 지정한 테이블에 값을 넣으려고 시도하면
+		        기본키에 그 값이 있는지 확인하고 있으면 허용 없으면 에러
+ 5) CHECK : 저장 가능한 데이터 값의 범위나 조건을 지정하여 설정한 값만 허용
+
+제약조건 확인하기
+ - USER_CONSTRAINTS 데이터 딕셔너리로 내가 만든 제약조건의 정보를 조회
+    · OWNER : 제약조건을 소유한 사용자명
+    · CONSTRAINT_NAME : 제약조건 명
+    · CONSTRAINT_TYPE : 제약조건 타입
+	1) P : PRIMARY KEY
+	2) R : FOREIGN KEY
+	3) U : UNIQUE
+	4) C : CHECK, NOT NULL
+    · TABLE_NAME : 제약조건이 속한 테이블명
+    · SEARCH_CONDITION : CHECK 조건일 경우 어떤 내용이 조건으로 사용되었는지?
+    · R_CONSTRAINT_NAME : FOREIGN KEY인 경우 어떤 PRAMARY KEY를 참조했는지?
+	ex) SELECT OWNER, CONSTRAINT_NAME, CONSTRAINT_TYPE
+		FROM USER_CONSTRAINTS;
+	     SELECT * FROM USER_CONSTRAINTS;
+
+CONSTRAINT : 제약조건을 주는 키워드
+
+컬럼 레벨 제약조건 설정하기
+ - 컬럼 레벨로 제약조건 이름을 명시해서 제약조건 설정
+       이 때 생긴 이름은 인덱스라고 부르며 검색할 때 검색키로 사용해서 검색 속도를 향상
+ - 컬럼을 생성할 때 제약조건을 지정
+       테이블 생성시 마지막에 쓰는건 테이블 레벨 제약조건
+ - 따로 제약조건의 이름을 명시하지 않으면 오라클에서 자동으로 만들어준다.
+ - 제약조건 이름 양식 
+       테이블명_컬럼명_타입
+
+PRIMARY KEY : NOT NULL 제약조건과 UNIQUE 제약조건을 모두 갖고 있는 제약조건
+		즉, 데이터들끼리의 유일성을 보장하는 칼럼에 설정
+		테이블당 한개만 설정이 가능하다.
+		단, 칼럼 두 개 이상을 하나로 묶어서 하나처럼 설정은 가능 = 복합키
+		    이 경우 중복을 막을 때 두 컬럼이 모두 같은게 있으면 막는다.
+
+FOREIGN KEY : 기본키에 존재하는 데이터만 외래키가 있는 테이블에 입력할 수 있다.
+		부모테이블은 자식의 데이터나 테이블이 삭제된다고 영향을 받지 않는다.
+		참조하는 데이터 칼럼과 데이터 타입이 "반드시" 일치해야 한다.
+		참조할수 있는 컬럼은 기본키 or UNIQUE만 가능하다.
+		외래키는 기본키
+
+CASCADE : PARENT(기본키) 삭제 시 CHILD(외래키)도 같이 삭제(사용을 지양)
+SET NULL : PARENT 삭제 시 CHILD의 해당 필드를 NULL로 UPDATE
+SET DEFAULT : PARENT 삭제 시 CHILD의 해당 필드를 DEFAULT 값으로 UPDATE
+RESTRICT : CHILD 테이블에 PK 값이 없는 경우만 PARENT 삭제
+NO ACTION : 참조 무결성 제약조건을 위배하는 액션은 불가
+
+COMPOSITE KEY : 여러 열을 조합하여 기본키 역할을 할 수 있게 만든 키(복합키)
+	               하나의 열만으로 행을 식별하는 것이 불가능하여 여러 열 값을
+		   함께 사용해야 각 행이 유일한 데이터로서 가치를 지닌다.
+		   이 경우 외래키로 참조할 때 복합키에 조합된 열 중 하나를 UNIQUE로 만들어서 참조?
+
+CHECK : 입력되는 값을 체크하여 설정된 값 이외의 값이 들어오면 
+	  오류 메시지와 함께 명령이 수행되지 못하게 하는 것.
+	  조건으로 데이터의 값의 범위나 특정 패턴의 숫자나 문자 값을 설정할 수 있다.
+	  ex) 컬럼명 number CONSTRAINT 테이블명_컬럼명_이름 CHECK(컬럼명 BETWEEN 500 AND 5000)
+	       컬럼명 varcher2 CONSTRAINT 테이블명_컬럼명_이름 CHECK(컬럼명 IN('M','m','F','f')
+
+DEFAULT : 아무런 값을 입력하지 않았을 때 디폴트로 값이 입력된다.
+	      NULL도 값이라서 NULL을 넣으면 디폴트 값이 아닌 NULL이 들어간다.
+
+테이블 레벨 방식의 제약조건
+ - 컬럼을 모두 정의하고 나서 테이블 정의를 마무리 짓기 전에
+       따로 생성된 컬럼들에 대한 제약조건을 한꺼번에 지정하는 것
+       [CONSTRAINT 테이블명_컬럼명_제약조건타입] 제약조건
+	                  생략 가능
+
+ - 복합키로 기본키를 지정할 경우
+       2개 이상의 컬럼이 하나의 기본키를 구성하는 경우
+       복합키 형태로 제약 조건을 지정할 경우 컬럼 레벨 형식으로는 불가능
+       반드시 테이블 레벨 방식을 사용
+       CONSTRAINT 인덱스 PRIMARY KEY(컬럼명1, 컬럼명2, ... )
+ 
+ - ALTER TABLE로 제약조건을 추가할 때
+       테이블의 정의가 완료되어서 이미 테이블의 구조가 결정된 후에
+       나중에 테이블에 제약 조건을 추가하고자 할 때 테이블 레벨 방식을 사용
+       (왠만하면 테이블을 정의할 때 제약조건을 정의하자.)
+
+PRIMARY KEY로 만든 column명 조회하기
+ - SELECT constraint_name, table_name, column_name FROM USER_CONS_COLUMNS;
+
+SEQUENCE : 번호표(인덱스) 붙이는 담당자
+	       레코드의 특정 컬럼에 대해 자동으로 인덱스를 부여할 수 있음
+	       NEXTVAL을 사용하여 다음 인덱스로 넘어감
+	       한 번 넘어간 인덱스는 이전 인덱스로 돌아올 수 없다.
+	       중복 인덱스가 부여되지 않으므로 UNIQUE 성질을 지킬 수 있다.
+	       - 생성
+	           · CREATE SYQUENCE 시퀀스명;
+	       - 사용
+	           · 시퀀스명.NEXTVAL을 기본키로 지정된 컬럼에 넣는다.
+	       - 삭제
+	           · DROP SEQUENCE 시퀀스명;
+	       - 현재 유저의 모든 시퀀스에 대한 정보 조회
+	           · SELECT * FROM USER_SEQUENCES;
+	       - 시퀀스 현재값 조회
+	           · SELECT 시퀀스명.CURRVAL FROM DUAL;
+		     DUAL 테이블이 아닌 사용하고 있는 테이블을 쓰면
+		     값이 행의 갯수만큼 여러번 출력
+		     DUAL 테이블 : 산술연산의 결과를 한줄로 얻기 위한 오라클 기본 제공 테이블
+	       - 시퀀스 옵션
+	           · START WITH n : n부터 시작
+	           · INCREMENT BY n : n씩 증가(음수면 감소, DEFAULT 1)
+	           · MAXVALUE n : 최대값을 n으로 지정
+	           · NOMAXVALUE : 최대값 없음(무한대로 증가, 기본설정)
+	           · MINVALUE n : 최소값을 n으로 지정
+	           · NOMINVALUE : 최소값 없음(무한대로 감소, 기본설정)
+	           · CYCLE : 최대값/최소값 도달시 순환(다시 최대값/최소값부터 시작)
+	           · NOCYCLE : 순환하지 않음(도달하면 더 이상 NEXTVAL을 사용할 수 없음, 기본설정)
+	           · CACHE : 미리 메모리에 생성 해두겠다, DEFAULT 20
+	           · NOCACHE : 미리 메모리에 생성해두지 않겠다.
+	           ※ ','로 구분하지 않고 그냥 띄워쓰기로 구분
+
+기본키와 외래키 사용 예제
+두 테이블이 연결되어 있고 한쪽 테이블에 기본키나 외래키가 아닌 정보로 
+다른쪽 테이블의 정보를 찾을 때 좀 더 유용하다
+
+

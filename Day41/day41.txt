@@ -1,0 +1,380 @@
+테이블 만들기
+ - 컬럼 = 열
+ - row, tuple, record = 행
+
+행의 대표값 = 기본키 = 유일키 = 중복x = 반드시 있어야 함(NOT NULL)
+
+외래키 = 테이블 간을 연결하는 용도 = 외래키와 연결될 컬럼은 그 테이블의 기본키여야 함 
+= 1개의 테이블에 외래키를 여러개 만들 수 있다.
+
+테이블에 데이터를 삽입할 때 테이블에서 컬럼을 선언한 순서대로 쓰거나,
+순서를 바꾸고 싶으면 INSERT INTO 테이블명(컬럼1, 컬럼2, 컬럼3) VALUES(값1, 값2, 값3);같이
+순서만 맞춰서 값을 넣으면 된다.
+
+NULL은 0이나 공백이 아니라 미확정된 자료
+--------------------------------------------------------------------------------------------
+집합 연산자
+ - UNION(합집합)
+ - DIFFERENCE(차집합)
+ - INTERSECT(교집합)
+입력테이블과 결과 테이블에 중복된 레코드가 배제된다.
+
+합집합
+select * from group_star UNION select * from single_star; (중복 x)
+select * from group_star UNION ALL select * from single_star; (중복 o)
+
+교집합
+select * from group_star INTERSECT select * from single_star;
+
+차집합
+select * from group_star MINUS select * from single_star;
+
+Dual 테이블
+ - 바로 산술 연산의 결과를 한 줄로 얻기 위해서 오라클에서 제공해주는 테이블
+select 24*60 from dual;
+select round(3.83,1) from dual; - 소수점 한자리까지 표기 = 소수점 2번째 자리를 반올림 = 3.8
+select mod(10,3) from dual; - 나머지구하기 10/3 = 1 = 자바의 %와 같음
+select 'Welcome to Oracle' , upper('Welcome to ORacle'), = 전부 대문자로
+lower('Welcome to oracle'), = 전부 소문자로
+initcap('welcome to oracle') from dual; = 첫글자만 대문자로
+select length('welcome to oracle') from dual; = 문자길이
+select lengthb('welcome to oracle 한글') from dual; = 문자바이트수
+select concat('ab','cd') from dual; = 2개의 문자를 하나로 연결
+
+select substr('Welcome to Oracle',2,3) from dual; = 2번째부터 3개만큼 추출 = 시작은 1
+select substrb('가나다라마바사',2,5) from dual; = 한글은 오라클 세팅에 따라 2바이트 or 3바이트씩 
+= 2바이트부터 5바이트 읽기 = 나 다시 찾기 = 완벽하게 3바이트가 포함된 글자만 출력 
+ex) 1,2,3이 포함되면 가가 출력하지만 2,3 혹은 1,2만 포함되면 출력되지 않음
+
+select instr('데이터베이스','이',4,1) from dual; 
+대상, 찾을 글자, 시작위치, 중복시 몇번째에 있는 것(한글을 1바이트로 봄)
+= 4번째인 '베'부터 시작해서 '이'를 검색 = 5번째 '이' = 5
+
+select instrb('데이터베이스','이',4,1) from dual;
+시작위치가 4바이트, 첫번째 '이'를 찾아라 = '이'의 제일 첫바이트 4 = 4
+찾는 글자가 '터'일 경우 터는 7~9바이트를 차지하기 때문에 7이 리턴
+
+select lpad('Oracle',20,'#') from dual; 자리를 20칸 마련하고 데이터를 오른쪽부터 채우고 남은 칸은 #으로 채움
+select rpad('Oracle',20,'#') from dual; 자리를 20칸 마련하고 데이터를 왼쪽부터 채우고 남은 칸은 #으로 채움
+숫자는 채워질 때 오른쪽에서 왼쪽으로 하나씩 채워진다.
+문자는 특별히 지정하지 않으면 왼쪽에서 오른쪽으로 채워진다.
+
+형변환함수
+ - 자료형을 변환시키고자 할 때 사용
+to_char = 날짜 or 숫자를 문자로
+to_date = 문자를 날짜로
+to_number = 문자를 숫자로
+단, 문자가 'ab'이면 숫자로 변경 불가능, 숫자로만 이루어져 있어야하면 변환가능
+
+
+to_char(sysdate, 'yyyy-MM-dd')     <- 날짜를 문자로
+sysdate = 컴퓨터의 현재시간을 가져오는것
+select sysdate, to_char(sysdate,'yyyy/MM/dd') from dual;
+select sysdate, to_char(sysdate,'yyyy/MM/dd, AM HH:MI:SS') from dual;
+
+select to_char(123400, 'L999,999,999') from dual; = \123,400 <- 숫자를 문자로
+L은 지역별 통화기호(\,$ 등)
+숫자를 문자로 바꾸면서 형식을 맞춰주는 것
+select to_char(123400, 'L999,999,999.00') from dual; = \123,400.00 소수점도 가능
+9일 때 숫자가 들어오는게 형식보다 적으면 공백, 많으면 #만 출력
+0일 때 숫자가 들어오는게 형식보다 적으면 0으로 채우고, 많으면 #만 출력
+
+to_date
+select to_date(sysdate,'yyyy/MM/dd') from dual; 
+sysdate의 자리에 임의의 날짜를 지정할 수 있음
+
+to_number
+select to_number('199999') from dual; <- 문자를 숫자로
+select to_number('542') - to_number('500') from dual; = 42  <- 연산도 가능하다
+select '542'+'500' from dual; <- 자동형변환 가능
+
+데이터베이스에는 날짜형이 있다.
+특정 기준으로 버리는 함수
+select to_char(hiredate, 'yyyy/mm/dd') 입사일, to_char(trunc(hiredate, 'MONTH'),'yyyy/mm/dd') 입사일 from emp;
+달을 기준으로 버린 것, (반올림, 반내림 아님)
+ex) 3월 9일이면 3월 1일
+
+select to_char(hiredate, 'yyyy/mm/dd') 입사일, to_char(round(hiredate, 'MONTH'),'yyyy/mm/dd') 입사일 from emp;
+달을 기준으로 16일부터 위로는 반올림, 15일부터 밑으로는 반내림
+
+한주가 시작되는 날짜
+select to_char(hiredate, 'yyyy/mm/dd') 입사일, to_char(round(hiredate, 'DAY'),'yyyy/mm/dd') 입사일 from emp;
+일을 기준으로 그 일이 포함된 주의 일요일을 출력
+
+select sal, round(sal,-2) from emp;
+10의 자리에서 반올림
+양수면 소수점
+음수면 1의자리, 10의자리, ...
+
+MONTHS_BETWEEN 함수
+ - 날짜와 날짜 사이의 개월 수를 구하는 함수
+select ename, sysdate 오늘, to_char(hiredate, 'yyyy/mm/dd'), trunc(MONTHS_BETWEEN(sysdate, hiredate)) from emp;
+
+ADD_MONTHS 함수
+ - 특정 개월 수를 더한 날짜를 구하는 함수
+select ename, to_char(add_months(hiredate, 6), 'yyyy-mm-dd') from emp;
+hiredate에서 6개월을 더한 날짜가 출력
+
+NEXT_DAY 함수
+ - 해당 요일의 가장 가까운 날짜를 반환
+select to_char(sysdate, 'yyyy/mm/dd'), to_char(NEXT_DAY(sysdate, 'MONDAY'),'yyyy/mm/dd') from dual;
+현재 컴퓨터 시스템의 국가형식이 대한민국이라서 영어요일은 오류가 나고 한국 요일만 사용가능
+혹은 공용으로 사용하는 숫자를 사용함 ex) 일=1, 월=2, ... , 토=7
+select to_char(sysdate, 'yyyy/mm/dd') 오늘,
+       to_char(next_day(sysdate,'월'),'yyyy/mm/dd') 월요일
+       from dual; 혹은
+select to_char(sysdate, 'yyyy/mm/dd') 오늘,
+       to_char(next_day(sysdate,2),'yyyy/mm/dd') 월요일
+       from dual;
+
+
+LAST_DAY 함수
+ - 각 월의 마지막 날짜를 반환
+select ename, to_char(hiredate,'yyyy/mm/dd'), to_char(last_day(hiredate), 'yyyy/mm/dd') from emp;
+
+NULL을 다른 값으로 변환하는 함수
+ - NVL 함수는 NULL을 0 또는 다른 값으로 변환
+NVL(expr1, expr2) = expr1이 null이면 expr2로 반환
+select comm, nvl(comm,0) from emp; - 숫자
+select hiredate, nvl(hiredate, '2020/12/25') from emp; - 날짜
+select ename, nvl(ename, 'IU') from emp; - 문자
+select job, nvl(job, '회장') from emp; - 문자
+
+NVL2(expr1, expr2, expr3) = expr1이 null이 아니면 expr2를 반환, null이면 expr3를 반환
+select ename, sal, comm, nvl2(comm, sal*12+comm, sal*12) from emp;
+
+NULLIF함수
+ - 두 표현식을 비교하여 동일하면 null, 동일하지 않으면 첫번째 표현식을 반환
+ - NULLIF(expr1, expr2)
+    동일하지 않으면 expr1 반환
+    동일하면 null 반환
+select nullif('a','a'),nullif('a','b') from dual; = null, a
+
+COALESCE 함수
+ - null이 아닌 첫 번째 인수를 반환
+null을 빼고 첫번째로 나오는 값
+select coalesce('a','b','c','d') from dual; = a
+select coalesce('a','b',null,'c','d') from dual; = a
+select coalesce('a','b','c',null,'d') from dual; = a
+
+선택을 위한 DECODE 함수
+ - switch case와 같은 기능
+select ename, deptno, decode(deptno, 10, '경리부',
+                                     20, '인사과',
+                                     30, '영업부',
+                                     40, '전산부') from emp;
+deptno가 10이면 경리부, 20이면 인사과 , ...
+
+조건에 따라 서로 다른 처리가 가능한 CASE
+ - 다양한 비교 연산자를 이용하여 조건을 제시할 수 있으므로 범위를 지정할 수도 있다.
+ - if else-if else와 비슷하다
+select ename, deptno, 
+    case when deptno = 10 then '경리부'
+         when deptno = 20 then '인사부'
+         when deptno = 30 then '영업부'
+         when deptno = 40 then '전산부'
+    end as dname
+    from emp;
+
+
+9월에 입사한 사원
+select * from emp where substr(hiredate, 4,2)=09;
+
+2003년도에 입사한 사원
+select * from emp where substr(hiredate,1,2)=03;
+
+이름이 '기'로 끝나는 사람 검색
+select * from emp where substr(ename,-1,1)='기';
+-1이면 맨 뒤라는 뜻
+
+이름의 두번째 글자에 '동'이 있는 사원을 검색
+select * from emp where instr(ename, '동',2, 1) = 2;
+instr은 이름이 있는 번호를 리턴
+신동엽이면 2를 리턴, 김제동이면 3을 리턴
+
+직급에 따라 급여를 인상, 부장은 5%, 과장은 10%, 대리는 13%, 사원은 20%
+select ename, job, decode(job, '부장', sal*1.05,
+                               '과장', sal*1.1,
+                               '대리', sal*1.13,
+                               '사원', sal*1.2,
+                                       sal) upsal from emp;
+마지막에 있는 sal은 어디에도 해당되지 않는 사람
+
+입사일 연도는 2자리(YY), 월은 숫자(MON)으로 표시, 요일은 약어(DY)로 지정하여 출력
+select hiredate, to_char(hiredate,'yy/mon/dd dy') from emp;
+
+그룹함수
+ - 단일행 함수와 그룹함수의 차이
+   그룹함수는 하나 이상의 행을 그룹으로 묶어 연산하여
+   총합, 평균 등 하나의 결과로 출력
+select sum(sal) from emp; sal의 총합
+select avg(sal) from emp; sal의 평균
+select count(job) from emp; count는 null을 제외한 갯수를 센다
+
+select ename, max(sal) from emp;는 오류 발생
+max(sal)은 결과가 1개인데 ename은 여러개의 결과가 나오기 때문에
+그룹함수와 단일행함수를 동시에 사용하려면 부속질의어를 사용해야 함(11장에서 배움)
+
+데이터그룹 Group by절
+ - 특정 컬럼을 기준으로 그룹 함수를 사용해야 할 경우 
+   어떤 컬럼 값을 기준으로 그룹함수를 적용해 줄지를 결정해줄 때 사용
+--group by
+select sum(sal) from emp;--모든 사람의 총합
+--부서별로 총합(부분합)
+select deptno, sum(sal) from emp group by deptno;
+--직급별로 총합(부분합)
+select job, sum(sal) from emp group by job;
+--부서별 직급이 사원인 사람들의 월급 총합
+select deptno, sum(sal) from emp where job='사원' group by deptno;
+--김씨 성을 가진 사람들의 월급 평균
+select job, avg(sal) from emp where ename like '김%' group by job;
+--입사일이 2000년부터 2003년 사이
+select job, avg(sal) from emp where substr(hiredate, 1, 2) in('00','01','02','03') group by job;
+--부서번호, 최대값, 최소값을 구해서 최대값 오름차순으로 정렬
+select deptno, max(sal), min(sal) from emp group by deptno order by max(sal);
+
+그룹결과제한 Having절
+ - SELECT절에 조건을 사용하여 그룹의 결과를 제한할 때 사용
+   (그냥 결과를 제한할 때는 WHERE절을 사용)
+--평균이 500 이상만 출력
+select deptno, avg(sal), max(sal), min(sal) from emp group by deptno having avg(sal) >= 500;
+
+select deptno, avg(sal), max(sal), min(sal) from emp group by deptno having avg(sal) >= 500 order by deptno;
+순서가 정해져 있는것, 
+검색 1등 WHERE조건절 2등 그룹 3등 HAVING조건절 4등 정렬 5등
+
+--그룹함수를 사용하여 통계데이터 구하기
+--모든 사원의 급여최고액, 최저액, 총액, 및 평균 출력
+--평균은 정수로 반올림
+select max(sal) 최고액, min(sal) 최저액, sum(sal) 총액, round(avg(sal),0) 평균 from emp;
+
+--count(*)함수를 이용하여 담당 업무별 사원수 출력
+select deptno, count(*) from emp group by deptno order by deptno;
+
+--과장 수를 나열
+select count(*) from emp where job='과장';
+
+count(*) : 임의의 컬럼수
+
+--급여 최고액, 최저액의 차액을 출력
+select max(sal), min(sal), max(sal) - min(sal) from emp;
+
+--직급별 사원의 최저 급여를 출력,
+--최저가 500미만인 그룹은 제외시키고, 결과를 급여에 대한 내림차순으로 정렬하여 출력
+select job, min(sal) from emp group by job having min(sal)>=500 order by min(sal) desc;
+
+--각 부서에 대한 부서번호, 사원수, 부서내의 모든 사원 평균 급여를 출력
+--평균 급여는 소수점 둘째자리로 반올림
+select deptno 부서번호, count(*) 사원수, round(avg(sal),2) 평균 from emp group by deptno;
+
+--각 부서에 대해 부서번호 이름, 지역명, 사원수, 부서 내의 모든 사원의 평균 급여를 출력
+--평균 급여는 정수로 소수점 둘째 자리로 반올림
+select decode(deptno, 10, '경리부',
+                      20, '인사부',
+                      30, '영업부',
+                      40, '전산부') 부서이름,
+       decode(deptno, 10, '서울',
+                      20, '인천',
+                      30, '용인',
+                      40, '수원') 지역명,count(*), round(avg(sal),2) from emp group by deptno;
+
+
+
+함수뒤에 b가 붙으면 바이트수로 처리해서 한글을 2 혹은 3바이트로 보고
+b가 붙지 않으면 한글을 1바이트로 본다.
+
+
+
+
+
+
+
+
+
+문제 다시 풀어보기
+
+
+1. 문자 조작함수를 시용하여 특정 행만 조회하라
+
+2. DECODE함수를 사용하여 조건에 따른 서로 다른 결과를 구하라
+
+3. 형변환 함수를 사용하여 원하는 형태로 출력하라
+
+​
+
+1. 문자 조작함수를 시용하여 특정 행만 조회하라
+
+​
+
+1) 9월에 입사한 사원을 출력해 보세요 (SUBSTR)함수를 사용한다.
+
+​
+
+2) 2003년도에 입사한 사원을 알아내기 위한 쿼리문은 다음과 같이 작성할 수 있습니다.
+
+SELECT * from emp where hiredate >= to_date('2003/01/01', 'yyyy/mm/dd')
+
+                                   add  hiredate <= to_date('2003/12/31', 'yyyy/mm/dd');
+
+​
+
+​
+
+SELECT * from emp where hiredate between  to_date('2003/01/01', 'yyyy/mm/dd')
+
+                                   add  to_date('2003/12/31', 'yyyy/mm/dd');
+
+​
+
+이러한 방법 말고 SUBSTR함수를 이용하여 2003년도 입사한 사원을 검색해 보도록 하시오
+
+​
+
+3) 다음은 이름이 '기'로 끝나는 사람을 검색해 보도록 합시다.
+
+   SELECT * FROM emp WHERE  ename LIKE '%기';
+
+​
+
+이러한 방복 말고 SUBSTR함수를 이용하여 ename 컬럼의 마지막 문자 한개만 추출해서 이름이 '기'로 끝나는 사원을 검색해 보도록 하세요.
+
+​
+
+힌트 : 시작 위치는 -1로 주고, 추출할 문자 개수를 1로 주면 됩니다
+
+​
+
+4) 이번에는 이름의 두번째 글자에 '동'이 있는 사원을 검색해 보세요
+
+​
+
+이런 문제가 주어지면 일반적으로 LIKE연산자와 '_'와일드 카드를 사용해서 구할 수 있습니다.
+
+SELECT empno, ename FROM emp WHERE ename LIKE '_동%';
+
+​
+
+이름의 두번째 글자에 '동'이 있는 사원을 검색하기 위해서 와일드 카드('_')와 LIKE연산자를 사용하여 위와 같이 표현할 수 있지만 INSTR함수를 사용하여 작성해 보세요
+
+​
+
+​
+
+​
+
+2. DECODE함수를 사용하여 조건에 따른 서로 다른 결과를 구하라
+
+​
+
+1) 직급에 따라 급여를 인상하도록 합시다. 직급이 '부장'인 사원은 5%, '과장'인 사원은 10%, '대리'인 사원은 13%, '사원'인 사원은 20%인상합니다.
+
+​
+
+​
+
+3. 형변환 함수를 사용하여 원하는 형태로 출력하라
+
+​
+
+입사일 연도는 2자리(YY), 월은 숫자(MON)으로 표시하고, 요일은 약어(DY)로 지정하여 출력하시오
+
