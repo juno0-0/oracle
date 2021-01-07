@@ -1,0 +1,32 @@
+SELECT 쿼리 수행 순서
+ - SELECT ⑤
+    FROM ①
+    WHERE ②
+    GROUP BY ③
+    HAVING ④
+    ORDER BY ⑥
+
+ ① FROM : 적혀있는 테이블들이 존재하는지 확인
+	      권한이 있는지 확인, 권한이 없을 경우 DB가 Semantic Error를 발생
+
+ ② WHERE : 어떤 조건들이 있는지 확인하고
+	       테이블에서 조건에 맞는 로우들을 가지고 옴
+
+ ③ GROUP BY : 가지고 온 로우들을 어떤 방식으로 GROUP BY 할 것인지 확인
+
+ ④ HAVING : GROUP BY 한것 중에서 버려야할 데이터들이 있는지 확인
+
+ ⑤ SELECT : 내가 가져온 로우 중 어떤 컬럼들을 출력해야 하는지 확인
+                   일단 다 가져오고 난 다음에 SELECT절을 확인하기 때문에
+	       SELECT * FROM과 SELECT에서 컬럼 1개만 가져온거랑
+	       사실상 드는 IO비용은 같다.
+	       단, SELECT절에 있는 컬럼들이 모두 인덱스에 담겨져 있다면 다른 문제
+
+ ⑥ ORDER BY : 사용할 로우들과 필요한 컬럼들까지 다 가지고 왔을 때 정렬
+	           SELECT절에서 컬럼에 별칭(Alias)을 지정해 놨을 경우
+
+ ※ 이전 순서에서 Alias를 지정하면 이후 순서부터는 Alias를 사용할 수 있다.
+
+ Semantic Error : SELECE 권한이 없는데 SELECT문을 사용하거나
+	          UPDATE 권한이 없는데 UPDATE문을 사용하는 경우
+ Syntax Error : 오타를 치거나, 쉼표가 있어야 하는데 쉼표가 없는 경우
