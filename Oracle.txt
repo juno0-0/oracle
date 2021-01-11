@@ -37,7 +37,7 @@ SQL 명령어의 유형
    · RENAME : 데이터베이스 객체이름 변경, 테이블 이름 변경
 
  - TCL(Transaction Control Language, 트랙잭션 처리어)
- ※ Transaction : 데이터베이스의 상태를 변화시키기 위해 수행하는 작업의 단위
+        ※ Transaction : 데이터베이스의 상태를 변화시키기 위해 수행하는 작업의 단위
    · COMMIT : 트랜잭션의 정상적인 종료처리, 변경된 내용을 영구 저장
    · ROLLBACK : 트랜잭션 취소, 변경되기 이전 상태로 되돌림
    · SAVEPOINT : 트랜잭션 내에 세이브포인트 설정
@@ -47,12 +47,12 @@ SQL 명령어의 유형
    · REVOKE : 데이터베이스에 대한 일련의 권한 취소
 
 사용자 계정 만들기
- - CREATE USER 사용자ID IDENTIFIEN BY 사용자PW;
+ - CREATE USER 사용자ID IDENTIFIED BY 사용자PW;
 
 역할 부여하기
  - GRANT 키워드를 사용
- - connect : 접속할 수 있는 권한을 줌
- - resource : DDL 권한을 줌
+ - CONNECT : 접속할 수 있는 권한을 줌
+ - RESOURCE : DDL 권한을 줌
  - 사용자 계정 만들기와 역할 부여 권한은 system에게만 있다.
 
 데이터 타입
@@ -70,6 +70,10 @@ SQL 명령어의 유형
    · 최대타입 : 4000바이트
    · 최소타입 : 1바이트
    · 한글은 2바이트
+
+ ※ VARCHAR와 VARCHAR2는 동의어
+        VARCHAR는 나중에 다른 데이터 타입으로 바뀔 수 있기 때문에
+        왠만하면 VARCHAR2를 사용
 
  - NVARCHAR2(size)
    · 국가별 문자 집합에 따른 size 크기의 
@@ -939,10 +943,36 @@ WHERE절에 사용하는 중첩 서브쿼리
 	    조건을 1=0으로 주면 구조만 동일한 빈 테이블이 생성
 
  - 서브쿼리로 데이터 삽입하기
-   · INSERT INTO 복제테이블명 SELECT * FROM 원본테이블명 WHERE 조건;
+   · 테이블 내용을 복사할 때 구조가 같은데 컬럼명이 다르면 삽입이 가능함
 
-select * from member where age >= (select avg(age) from member)
+   · 구조 순서가 다르거나 갯수가 다르고 같은 타입의 컬럼이 있을 경우
+         컬럼을 명시해주면 복사가 가능하다.
+         INSERT INTO dept06(deptno, dname1, loc1) SELECT * FROM dept;
+         INSERT INTO dept06 SELECT deptno, dname1, loc1 FROM dept; --위와 같음
 
+ - 서브쿼리로 데이터 변경하기
+   · UPDATE dept03 
+         SET loc = (SELECT loc FROM dept03 WHERE deptno=40) 
+	  WHERE deptno = 20;
+
+ - 서브쿼리로 데이터 삭제하기
+       DELETE emp02 
+	WHERE deptno = (SELECT deptno FROM dept WHERE dname = '영업부');
+
+CEIL
+ - 나누고 소수점이 발생하면 무조건 올려줌
+        SELECT CEIL(10/3) FROM DUAL;
+        결과는 3.3333...이지만 CEIL이라서 4가 나옴
+
+ROLLUP
+ - GROUP BY를 한 결과를 가지고 롤업하면 GROUP BY를 한 애들의 총합을 구할 수 있음
+       여러 칼람을 ROLLUP할 경우 ROLLUP(칼럼명1, 칼럼명2)를 하게 되면 결과가
+           GROUP BY 칼럼명1, 칼럼명2 + GROUP BY 칼럼명1 + 총합계
+           어떤 칼럼이 앞에 오느냐에 따라 결과가 달라짐
+       칼럼이 3개일 경우
+           GROUP BY 칼럼명1, 칼럼명2, 칼럼명3 + GROUP BY 칼럼명1, 칼럼명2 + GROUP BY 칼럼명1 + 총합계
+       만약 GROUP BY ROLLUP으로 어려개를 묶었지만 필요 없는 총계들이 생길 경우
+           필요없는 총계들끼리 묶어준다.
 
 
       

@@ -1,0 +1,180 @@
+View
+ - 물리적인 테이블(Table)을 근거로 논리적인 가상 테이블(View)을 정의
+         창문을 통해 보고싶은 부분(쿼리문)을 View로 만드는 것
+ - DB의 SELECT문을 저장한 OBJECT
+ - 쿼리문에서 테이블처럼 사용
+ - 뷰를 사용하는 이유
+        1) 긴 쿼리문이나 자주 사용하는 쿼리문을 View로 정의하면 접근을 단순화시킬 수 있음
+                쿼리문을 View에 저장
+        2) 보안에 유리함
+                테이블의 일부 칼럼만 View로 만들어서 일부 데이터만 보여줄 수 있음
+                    사용자에게 테이블을 보여주는 것이 아니라 View를 보여주는 것
+
+ - View의 내부 구조
+       desc user_views의 TEXT 칼럼에 View가 처리하는 쿼리문이 들어있음
+ 
+ - View 정의하기
+       테이블 복사와 같음
+       CREATE VIEW 뷰이름 AS 쿼리문;
+
+ - View 제거하기
+       DROP VIEW 뷰이름;
+
+ - View의 동작 순서
+       1) 사용자가 쿼리문을 수행
+              SELECT * FROM 뷰이름;
+       2) View의 TEXT 칼럼안에 있는 자료인 SELECT문을 수행
+       3) SELECT문을 통해 테이블의 데이터가 조회
+       4) 조회에 의한 결과 수행
+       5) 1번으로 결과를 리턴
+
+ - View에 데이터 추가하기
+       INSERT INTO 뷰이름 VALUES();
+ 
+ - View에 있는 데이터 수정하기
+       UPDATE 뷰이름 SET 바꿀내용 WHERE 조건
+
+ - View에 있는 데이터 삭제하기
+       DELETE 뷰이름 WHERE 조건
+           조건을 주지 않으면 뷰의 모든 데이터 삭제
+
+ ※ View에서 데이터를 추가, 수정, 삭제하면 물리적인 데이터에도 적용된다.
+        View 생성시 근거로 사용된 테이블의 자료도 바뀌는 것
+
+ - OP REPLACE
+       View가 존재하지 않으면 생성하고 존재하면 수정함
+       CREATE OR REPLACE VIEW 뷰이름 AS 쿼리문;
+
+ - FORCE
+       테이블이 없어도 View를 만드는 것
+           단, 테이블이 생성되지 않으면 생성한 View도 사용할 수 없음
+       거의 사용하지 않음
+       CREATE OR REPLACE FORCE VIEW 뷰이름 AS 쿼리문;
+
+ - NOFORCE
+       테이블이 있어야 View를 만드는 것
+       변경하지 않으면 Default(기본 설정)
+
+ - WITH CHECK OPTION
+       테이블 중 조건에 만족하는 ROW만으로 구성된 View를 생성
+       WHERE절에 있는 칼럼의 값의 수정을 막음
+       예시
+           CREATE VIEW 뷰이름 
+           AS SELECT * FROM 테이블명 
+           WHERE deptno = 30 WITH CHECK OPTION;
+               이 후에 deptno 수정시 오류 발생
+
+ - WITH READ ONLY
+       모든 칼럼을 읽기 전용으로 변경
+           수정, 추가, 삭제가 불가능
+       예시
+           CREATE OR REPLACE VIEW 뷰이름
+           AS SELECT * FROM 테이블명
+           WHERE 조건 WITH READ ONLY;
+
+INLINE VIEW 
+ - SQL문 내부에 View를 정의하고 이를 테이블처럼 사용하는 것
+ - FROM절에 쓰이는 서브 쿼리
+ - 다른 쿼리에서 사용할 필요 없이 해당 SQL에서만 필요한 View일 경우
+       View처럼 따로 Object를 생성하지 않고 SQL 안에 직접 기술해서 쓰는 일회성 View
+ - SELECT * FROM (SELECT * FROM 테이블명) 별칭;
+       별칭(Alias)는 경우에 따라 지정해주기
+
+ - View로 View를 만들 수 있다.
+       CREATE OR REPLACE VIEW 뷰이름 
+       AS SELECT * FROM 테이블명
+       ORDER BY 칼럼명;
+       
+       CREATE OR REPLACE VIEW 뷰이름2
+       AS SELECT * FROM 뷰이름
+       WHERE 조건;
+
+ROWNUM
+ - INSERT문을 이용하여 입력하면 자동으로 입력한 순서에 따라 1씩 증가하면서 값이 지정
+ - 데이터가 입력된 시점에서 결정되는 ROWNUM 칼럼의 값은 바뀌지 않음
+ - ROWID와 다르다.       
+       ROWID는 ROW가 가진 고유의 값
+
+CEIL
+ - 값을 나눴을 때 소수점이 발생하면 【무조건 올려줌】
+       SELECT CEIL(10/3) FROM DUAL;
+           결과는 3.333…이지만 CEIL이라서 4가 나옴
+
+ROLLUP
+ - 그룹별 Sub Total의 개념
+ - GROUP BY를 한 결과를 가지고 롤업하면 GROUP BY를 한 애들의 총합을 구할 수 있음
+       여러 칼럼을 ROLLUP할 경우 ROLLUP(칼럼명1, 칼럼명2)를 하게 되면
+       GROUP BY 칼럼명1, 칼럼명2 + GROUP BY 칼럼명1 + 총합계
+           어떤 칼럼이 앞에 오느냐에 따라 결과가 달라짐
+       칼럼이 3개일 경우
+       GROUP BY 칼럼명1, 칼럼명2, 칼럼명3 + GROUP BY 칼럼명1, 칼럼명2
+       + GROUP BY 칼럼명1 + 총합계
+       만약 GROUP BY ROLLUP으로 여러개를 묶었지만 필요 없는 총계들이 생길 경우
+           필요없는 총계들끼리 묶어준다.
+
+실행 내역 확인하기
+ - SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY_CURSOR(null, null, 'ALLSTATS LAST'));
+
+예제 풀어보기
+1. 사원 테이블을 기본 테이블로 하여 부서별 최대 급여와 최소급여을 출력하는 뷰를 SAL_VIEW란 이름으로 작성
+ - CREATE VIEW sal_view 
+       AS 
+       SELECT max(sal) max_sal, min(sal) min_sal
+       FROM emp
+       GROUP BY deptno
+       ORDER BY deptno;
+
+2. 인라인 뷰를 사용하여 급여를 많이 받는 순서대로 3명만 출력
+ - SELECT sal, ename, deptno
+       FROM (SELECT sal, ename, deptno 
+       FROM emp 
+       WHERE sal IS NOT NULL 
+       ORDER BY sal desc) e
+       WHERE ROWNUM <= 3
+
+3. professor테이블과 department테이블을 조인하여 교수번호와 교수이름, 소속 학과이름을 조회하는 view를 생성
+       view 이름은 v_prof_dept2
+ - CREATE VIEW v_prof_dept2 
+       AS
+       SELECT profno, name, dname 
+       FROM professor p JOIN department d 
+       ON p.deptno = d.deptno;
+
+4. inline view를 사용하여 student테이블과 departmant테이블을 사용하여 학과별로 학생들의 최대키와 최대 몸무게, 학과 이름을 출력
+ - SELECT max_height, max_weight, dname
+       FROM (SELECT max(height) max_height, max(weight) max_weight, deptno1
+                     FROM student
+                     GROUP BY deptno1) s JOIN department d
+       ON s.deptno1 = d.deptno
+
+5. student테이블과 departmemt테이블을 사용하여 학과 이름, 학과별 최대키, 학과별로 가장 키가 큰 학생들의 이름과 키를 
+        inline view를 사용하여 출력
+ - SELECT d.dname, max_height, s1.name, s1.height
+       FROM(SELECT max(height) max_height, deptno1 
+                     FROM student 
+                     GROUP BY deptno1 
+                     ORDER BY deptno1) s, student s1, department d
+       WHERE s.deptno1 = s1.deptno1 
+              AND s.max_height = s1.height 
+              AND s.deptno1 = d.deptno;
+
+6. student테이블에서 학생의 키가 동일 학년의 평균 키보다 큰 학생들의 학년과 이름 키, 해당 학년의 평균키를 출력하되 inline view를 사용해서 출력
+        (학년 컬럼으로 오름차순 정렬해서 출력하세요)
+ - SELECT s1.name, s1.height, s.avg_height, s.grade
+       FROM(SELECT avg(height) avg_height, grade 
+                     FROM student 
+                     GROUP BY grade) s, student s1
+       WHERE s.grade = s1.grade
+              AND s.avg_height < s1.height;
+
+7. professor테이블을 조회하여 교수들의 급여 순위와 이름과 급여을 출력
+       단 급여 순위는 급여가 많은 사람부터 1~5위까지 출력
+ - SELECT p.name, s.pay
+       FROM(SELECT pay 
+                     FROM professor 
+                     ORDER BY pay desc) s, professor p
+       WHERE p.pay = s.pay 
+              AND ROWNUM BETWEEN 1 AND 5
+
+​8. 교수 테이블을 교수 번호로 정렬하되 3건씩 분리해서 급여 합계와 급여 평균을 출력
+ - 
