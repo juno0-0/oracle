@@ -1,0 +1,290 @@
+SQL CONN  AS SYSDBA;
+Connected.
+SQL REVOKE SELECT ON DEPT01 FROM TESTER2;
+REVOKE SELECT ON DEPT01 FROM TESTER2
+                 
+ERROR at line 1
+ORA-00942 table or view does not exist
+
+
+SQL CONN TESTER11234;
+Connected.
+SQL REVOKE SELECT ON DEPT01 FROM TESTER2;
+
+Revoke succeeded.
+
+SQL CONN  AS SYSDBA;
+Connected.
+SQL CREATE USER TESTER3 IDENTIFIED BY 1234;
+
+User created.
+
+SQL GRANT CREATE SESSION, CREATE TABLE TO TESTER3;
+
+Grant succeeded.
+
+SQL SHOW USER;
+USER is SYS
+SQL REVOKE SELECT ON DEPT01 FROM TESTER2;
+REVOKE SELECT ON DEPT01 FROM TESTER2
+                 
+ERROR at line 1
+ORA-00942 table or view does not exist
+
+
+SQL REVOKE SELECT ON TESTER1.DEPT01 FROM TESTER2;
+REVOKE SELECT ON TESTER1.DEPT01 FROM TESTER2
+
+ERROR at line 1
+ORA-01927 cannot REVOKE privileges you did not grant
+
+
+SQL SHOW USER;
+USER is SYS
+SQL
+SQL
+SQL SHOW USER;
+USER is SYS
+SQL GRANT SELECT ON TESTER1.DEPT01 TO TESTER2;
+
+Grant succeeded.
+
+SQL REVOKE SELECT ON TESTER1.DEPT01 FROM TESTER2;
+
+Revoke succeeded.
+
+SQL CONN TESTER31234;
+Connected.
+SQL SHOW USER;
+USER is TESTER3
+SQL CONN TEST11234
+ERROR
+ORA-01017 invalid usernamepassword; logon denied
+
+
+Warning You are no longer connected to ORACLE.
+SQL CONN TESTER11234
+Connected.
+SQL GRANT INSERT ON DEPT01 TO TESTER3 WITH GRANT OPTION;
+
+Grant succeeded.
+
+SQL CONN TESTER31234;
+Connected.
+SQL INSERT INTO TESTER1.DEPT01 VALUES(50,'Q');
+
+1 row created.
+
+SQL COMMIT;
+
+Commit complete.
+
+SQL SELECT  FROM TESTER1.DEPT01;
+SELECT  FROM TESTER1.DEPT01
+                      
+ERROR at line 1
+ORA-01031 insufficient privileges
+
+
+SQL CONN TESTER21234
+Connected.
+SQL SELECT  FROM TESTER1.DEPT01;
+SELECT  FROM TESTER1.DEPT01
+                      
+ERROR at line 1
+ORA-01031 insufficient privileges
+
+
+SQL CONN TESTER11234;
+Connected.
+SQL SELECT  FROM TESTER1.DEPT01;
+
+    DEPTNO DNAME
+---------- --------------------
+         1 A
+         2 B
+         3 C
+         4 D
+         5 E
+         6 F
+         7 G
+         8 H
+         9 I
+        10 J
+        50 Q
+
+11 rows selected.
+
+SQL CONN TESTER21234
+Connected.
+SQL INSERT INTO TESTER1.DEPT01 VALUES(70,'Q');
+INSERT INTO TESTER1.DEPT01 VALUES(70,'Q')
+                    
+ERROR at line 1
+ORA-01031 insufficient privileges
+
+
+SQL CONN TESTER31234
+Connected.
+SQL GRANT INSERT ON TESTER1.DEPT01 TO TESTER2;
+
+Grant succeeded.
+
+SQL CONN TESTER21234
+Connected.
+SQL INSERT INTO TESTER1.DEPT01 VALUES(70,'Q');
+
+1 row created.
+
+SQL COMMIT;
+
+Commit complete.
+
+SQL CONN TESTER11234
+Connected.
+SQL SELECT  FROM DEPT01;
+
+    DEPTNO DNAME
+---------- --------------------
+         1 A
+         2 B
+         3 C
+         4 D
+         5 E
+         6 F
+         7 G
+         8 H
+         9 I
+        10 J
+        50 Q
+
+    DEPTNO DNAME
+---------- --------------------
+        70 Q
+
+12 rows selected.
+
+SQL CONN TESTER11234
+Connected.
+SQL GRANT SELECT, UPDATE ON DEPT02 TO TESTER2 WITH GRANT OPTION;
+GRANT SELECT, UPDATE ON DEPT02 TO TESTER2 WITH GRANT OPTION
+                        
+ERROR at line 1
+ORA-00942 table or view does not exist
+
+
+SQL GRANT SELECT, UPDATE ON DEPT01 TO TESTER2 WITH GRANT OPTION;
+
+Grant succeeded.
+
+SQL CONN TESTER21234
+Connected.
+SQL GRANT SELECT ON DEPT01 TO TESTER3 ;
+GRANT SELECT ON DEPT01 TO TESTER3
+                
+ERROR at line 1
+ORA-00942 table or view does not exist
+
+
+SQL GRANT SELECT ON TESTER1.DEPT01 TO TESTER3 ;
+
+Grant succeeded.
+
+SQL SHOW USER;
+USER is TESTER2
+SQL SELECT  FROM TESTER1.DEPT01;
+
+    DEPTNO DNAME
+---------- --------------------
+         1 A
+         2 B
+         3 C
+         4 D
+         5 E
+         6 F
+         7 G
+         8 H
+         9 I
+        10 J
+        50 Q
+
+    DEPTNO DNAME
+---------- --------------------
+        70 Q
+
+12 rows selected.
+
+SQL UPDATE TESTER1.DEPT01 SET DNAME = 'qq' WHERE DNAME='Q';
+
+2 rows updated.
+
+SQL SELECT  FROM TESTER1.DEPT01;
+
+    DEPTNO DNAME
+---------- --------------------
+         1 A
+         2 B
+         3 C
+         4 D
+         5 E
+         6 F
+         7 G
+         8 H
+         9 I
+        10 J
+        50 qq
+
+    DEPTNO DNAME
+---------- --------------------
+        70 qq
+
+12 rows selected.
+
+SQL UPDATE TESTER1.DEPT01 SET DNAME = 'qq' WHERE DNAME='Q';
+
+0 rows updated.
+
+SQL CONN TESTER31234
+Connected.
+SQL SELECT  FROM TESTER1.DEPT01;
+
+    DEPTNO DNAME
+---------- --------------------
+         1 A
+         2 B
+         3 C
+         4 D
+         5 E
+         6 F
+         7 G
+         8 H
+         9 I
+        10 J
+        50 qq
+
+    DEPTNO DNAME
+---------- --------------------
+        70 qq
+
+12 rows selected.
+
+SQL UPDATE TESTER1.DEPT01 SET DNAME = 'AA' WHERE DNAME='A';
+UPDATE TESTER1.DEPT01 SET DNAME = 'AA' WHERE DNAME='A'
+               
+ERROR at line 1
+ORA-01031 insufficient privileges
+
+
+SQL SHOW USER;
+USER is TESTER3
+SQL INSERT INTO TESTER1.DEPT01 VALUES(15,'hh');
+
+1 row created.
+
+SQL CONN TESTER11234
+Connected.
+SQL REVOKE SELECT ON TESTER1.DEPT01 FROM TESTER3;
+REVOKE SELECT ON TESTER1.DEPT01 FROM TESTER3
+
+ERROR at line 1
+ORA-01927 cannot REVOKE privileges you did not grant
