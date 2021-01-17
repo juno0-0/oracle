@@ -1275,6 +1275,505 @@ Oracle 11g express edition 제한 사항
  - 문자셋 변경
  - 구체화 된 뷰 질의 재 작성
 
+권한의 역할과 종류
+ - SYS : 모든 권한 관리자
+             
+ 1) 사용자 만들기
+        관리자(sys, system)에서 만들기
+
+ 2) 권한 부여
+        권한있는 사용자가 권한 없는 사용자에게 GRANT로 권한 부여★ 
+        GRANT 권한내용 TO 사용자명
+        [WITH ADMIN OPTION]; 
+            - 사용자명에 PUBLIC을 기술하면 모든 사용자에게 해당 시스템 권한이 부여된다.
+            - WITH ADMIN OPTION : 부여받은 권한을 다른 사용자에게 부여할 수 있다
+	- 관리자의 시스템 권한
+	      CREATE USER : 사용자를 생성하는 권한
+	      DROP USER : 사용자를 삭제하는 권한
+	      DROP ANY TABLE : 임의의 테이블을 삭제할 수 있는 권한
+	      QUERY REWRITE : 함수 기반 인덱스를 생성하는 권한
+	      BACKUP ANY TABLE : 임의의 테이블을 백업할 수 있는 권한
+                  CREATE SESSION : 접속할 권한
+	
+	- 사용자를 위한 시스템 권한
+	      CREATE SESSION : DB에 접속할 수 있는 권한
+	      CREATE TABLE : 사용자 스키마에서 테이블을 생성할 수 있는 권한
+	      CREATE VIEW : 사용자 스키마에서 뷰를 생성할 수 있는 권한
+	      CREATE SEQUENCE : 사용자 스키마에서 시퀀스를 생성할 수 있는 권한
+	      CREATE PROCEDURE : 사용자 스키마에서 함수를 생성할 수 있는 권한
+
+ ※ 테이블을 생성하거나 INSERT 할 때 데이터를 기록하려고 하는 
+        테이블 스페이스에 권한이 없어서 오류 발생
+            TableSpace : 테이블이 저장되는 공간
+		         테이블의 데이터를 DELETE하고 Commit해도 
+                                     TableSpace의 사용량은 변하지 않음
+        ALTER USER 사용자명 QUOTA 50M ON USERS;
+            사용자명에게 USERS 테이블스페이스를 50MB 사용할 수 있도록 권한 부여
+        GRANT UNLIMITED TABLESPACE TO 사용자명;
+            사용자명에게 모든 테이블스페이스에 대한 무제한 사용 권한 부여
+        원래 하지 않아도 알아서 부여 되던건데 언제부턴가 바뀜.
+        해당 유저에게 어떤 TableSpace에 어느정도 사용권한이 있는지 확인해보고 싶은 경우
+            SELECT * FROM USER_TS_QUOTAS;
+    
+ 3) 사용자로 접속하기
+        방법1) WINDOWS> SQLPLUS USERNAME / PASSWORD;
+        방법2) SQL> CONN USERNAME / PASSWORD;
+            접속할 권한이 없으면 오류 발생
+
+ 4) 권한을 부여받은 사용자가 권한이 없은 사용자에게 권한 부여
+        SYS에게 권한을 부여받을 때 
+        GRANT 권한내용 TO 사용자명 WITH ADMIN OPTION;하면
+        부여받은 권한을 다른 사용자에게 부여할 수 있다.
+
+
+객체 권한
+ - 특정 객체에 조작을 할 수 있는 권한
+ - 객체의 소유자는 객체에 대한 모든 권한을 가진다.
+       ALTER : TABLE, SEQUENCE
+       DELETE : TABLE, VIEW
+       EXECUTE : PROCEDURE
+       INDEX : TABLE
+       INSERT : TABLE, VIEW
+       REFERENCES : TABLE
+       SELECT : TABLE, VIEW, SEQUENCE
+       UPDATE : TABLE, VIEW
+
+ - GRANT 권한내용 ON 객체명 TO 사용자명
+    [WITH GRANT OPTION] : 받은 객체 권한을 다른 사용자에게 부여할 수 있음
+                                        2개를 받아서 1개만 넘겨줄 수도 있다.
+       시스템 권한과 다른 점은 ON이 추가된다는 점
+           ON에는 테이블 객체나 뷰 객체 등을 기술
+           단, 권한을 부여 받은 사용자명은 자신의 객체가 아니기 때문에
+               항상 객체를 사용할 때 객체명 앞에 객체를 소유한 사용자명을 명시한다.
+
+ - 예시
+       사용자1의 테이블을 사용자2가 검색(사용)을 하는 경우
+           검색의 권한은 테이블을 가지고 있는 사용자1이 가지고 있다.
+           GRANT SELECT ON 테이블명 TO 사용자2;
+               SELECT * FROM 사용자1.테이블명;
+
+ - Schema
+       객체를 소유한 사용자명을 의미
+       평소 스키마는 자신이 소유한 객체를 언급할 때 생략된다.
+           SELECT * FROM 테이블명;
+       하지만 다른 사용자가 소유한 객체를 언급할 때는 스키마를 명시한다.
+           SELECT * FROM 스키마명.테이블명;
+		       [사용자명]
+
+권한 조회
+    [롤 관련 데이터 사전]
+        ROLE_SYS_PRIVS                         ROLE에 부여된 시스템 권한
+        ROLE_TAB_PRIVS                         ROLE에 부여된 테이블 권한
+        USER_ROLE_PRIVS                       현재 사용자가 ACCESS할 수 있는 ROLE
+        USER_TAB_PRIVS_MADE               현재 사용자의 객체에 부여한 객체 권한
+        USER_TAB_PRIVS_RECD               현재 사용자의 객체에 부여된 객체 권한
+        USER_COL_PRIVS_MADE              현재 사용자 객체의 특정 컬럼에 부여한 객체 권한
+        USER_COL_PRIVS_RECD               현재 사용자 객체의 특정 컬럼에 부여된 객체 권한
+
+ - REVOKE
+       사용자에게 부여한 객체 권한을 철회하는 명령어
+           객체 권한을 준 곳에서 사용
+               만약 sys, system에서 사용하려면 객체명 앞에 스키마명을 명시해준다.
+       REVOKE 권한내용 ON 객체명 FROM 사용자명
+       [CASCADE CONSTRAINTS]
+           참조 객체 권한에서 사용 된 무결성 제한을 같이 삭제할 수 있음
+       [WITH GRANT OPTION]; 
+       사용자명에 PUBLIC을 주면 모든 사용자에게 준 권한을 철회하는 것
+           주는건 TO 뺏는건 FROM
+       WITH GRANT OPTION : 부여받은 객체 권한을 다른 사용자에게 부여할 수 있음
+			     객체 권한을 부여한 사용자의 객체 권한을 철회하면,
+		                 권한을 부여받은 사용자가 부여한 객체 권한 또한 
+                                         같이 철회되는 종속철회가 발생
+
+롤을 사용한 권한 부여
+ - CONNECT 롤
+       사용자가 데이터베이스에 접속 가능하도록 하기 위해 
+           가장 기본적인 시스템 권한 8가지를 묶어 놓음
+       ALTER SESSION, CREATE CLUSTER, CREATE DATABASE LINK, CREATE VIEW,
+           CREATE SEQUENCE, CREATE SESSION, CREATE SYNONYM, CREATE TABLE
+
+ - RESOURCE 롤
+       사용자가 객체(테이블, 뷰, 인덱스)를 생성할 수 있도록 하기 위해
+           시스템 권한을 묶어 놓음
+       CREATE CLUSTER, CREATE PROCEDURE, CREATE SEQUENCE,
+           CREATE TABLE, CREATE TRIGGER
+
+ - DBA 롤
+       사용자들이 소유한 데이터베이스 객체를 관리하고,
+           사용자들이 작성하고 변경하고 제거할 수 있도록 하는 모든 권한을 가짐
+           즉, 시스템 자원을 무제한적으로 사용하며,
+               시스템 관리에 필요한 모든 권한을 부여할 수 있는 강력한 권한을 보유한 롤
+
+ - 롤을 사용하여 권한 부여하기
+       GRANT 역할명(롤), ... TO 사용자명;
+
+ - 사용자에게 부여된 역할을 확인하기
+       SELECT * FROM dict WHERE table_name LIKE '%ROLE%';
+
+사용자 롤 정의
+    1) 롤(역할)을 생성한다.(DB 관리자)
+           CREATE ROLE 롤이름;
+    2) 롤에 권한을 부여한다.(DB 관리자 or 특정 사용자)
+           GRANT 권한내용 TO 롤이름;
+               권한내용 : 관리자의 시스템의 권한, 사용자를 위한 시스템 권한
+    3) 사용자에게 롤을 부여한다.(DB 관리자)
+           GTANT 롤이름 TO 사용자명;
+
+ - 사용자에게 ROLE 회수하기
+       REVOKE 롤이름 FROM 사용자명;
+       롤을 부여했던 사용자에서 회수
+
+ - ROLE 제거하기
+       DROP ROLE 롤이름;
+       롤을 만든 사용자에서 제거
+       
+ - ROLE의 장점
+       여러 사용자들에게 동일한 역할을 부여하기 편리함.
+
+ ※ ROLE : 여러가지 권한을 묶어놓은 곳
+
+동의어(SYNONYM)
+ - 다른 데이터베이스 객체에 대한 별명
+ - 데이터베이스에서는 여러 사용자들이 테이블을 서로 공유하는데,
+       다른 사용자의 테이블을 접근할 때 사용자명.테이블명으로 표현
+       이를 동의어를 적용하여 간단하게 요약해서 기술할 수 있다.
+ - 다른 계정에 있는 테이블을 가져다 쓰는 경우 보안상에 문제가 될 수 있어서 사용
+ - 동의어는 지속적인 관리가 필요함
+       동의어의 존재 유무를 모르는 사람이 동일한 이름의 테이블을 만드는 경우 오류 발생
+       테이블을 생성한 사용자가 테이블을 지운경우 
+           동의어를 통해 테이블을 이용하던 사용자들의 입장에서는 오류 발생
+
+ - 동의어 생성하기
+       CREATE [PUBLIC] SYNONYM 동의어명 FOR 사용자명.테이블명;
+           PUBLIC을 붙이면 모든 사용자가 사용할 수 있는 공개 동의어가 된다.
+           PUBLIC을 붙이지 않으면 PRIVATE 상태
+               SYNONYM을 사용할 계정에서 생성
+               보통 이름은 편의성을 위해서 테이블명과 동일하게 한다.★
+      
+ - 동의어 삭제하기
+       DROP SYNONYM 동의어명;
+       만약 공개 동의어일 경우 PUBLIC를 붙여준다.
+           DROP PUBLIC SYNONYM 동의어명;
+
+ - 현재 계정의 SYNONYM 조회
+       SELECT * FROM user_synonyms
+
+ - 전체 SYNONYM 조회
+       SELECT * FROM all_synonyms
+       
+PL/SQL의 구조
+ - Oracle's Procedural Language extension to SQL의 약자
+ - SQL문장에서 변수 정의, 조건 처리(IF), 반복 처리(LOOP, WHILE, FOR) 등을 지원
+       오라클 자체에 내장되어 있는 절차적 언어로서 SQL의 단점을 보완한다.
+ - DECLARE(선언부, 옵션)
+       PL/SQL에서 사용하는 모든 변수나 상수를 선언하는 부분
+           DECLARE로 시작
+
+ - BEGIN(실행부, 필수)
+       절차적 형식으로 SQL 문을 실행할 수 있도록 절차적 언어의 요소인 
+           제어문, 반복문, 함수 정의 등 로직을 기술할 수 있는 부분
+           BEGIN으로 시작
+
+ - EXCEPTION(예외처리부, 옵션)
+       PL/SQL문이 실행되는 중에 에러가 발생할 수 있는데 이를 예외사항이라 함
+           이러한 예외상황이 발생했을 때 이를 해결하기 위한 문장을 기술할 수 있는 부분
+           EXCEPTION으로 시작
+
+ - 작성 요령
+       1) 블록 내에서 한 문장이 종료할 때마다 ';'을 사용
+       2) END 뒤에 ';'을 사용하여 하나의 블록이 끝났다는 것을 명시
+       3) 블록의 작성은 편집기를 통해 파일로 작성할 수 있고,
+              프롬프트에서 바로 작성할 수도 있음
+       4) SQL*PLUS 환경에서는 DECLARE나 BEGIN이라는 키워드로
+              PL/SQL 블록이 시작하는 것을 알 수 있음
+       5) 단일 행 주석은 --, 여러 행 주속은 /**/
+       6) 쿼리문을 수행하기 위해서 /가 반드시 입력되어야 하며,
+              PL/SQL 블록은 행에 /가 있으면 종결된 것으로 간주함
+
+       ex) DECLARE -- 선언부
+               vempno number(4); -- 스칼라 변수
+               vename varchar2(10); -- 여기서 바로 초기값을 넣어도 된다
+            BEGIN -- 실행부
+                vempno := 1001; -- 값 넣기
+                vename := '이지은';
+                DBMS_OUTPUT.PUT_LINE(vempno||'     '||vename); -- syso와 비슷함, ||는 문자열과 문자열을 연결
+                END; -- 끝
+                / -- 실행
+                
+변수선언과 대입문
+ - PL/SQL의 선언부(DECLARE)에서는 실행부(BEGIN)에서 사용할 변수를 선언
+ - 형식
+       변수명 [CONSTANT] 자료형 [NOT NULL] [:= | DEFAULT Expression];
+           CONSTRANT 
+               변수의 값을 변경할 수 없도록 제약
+           Expression
+               Literal, 다른 변수, 연산자나 함수를 포함하는 표현식
+
+ - PL/SQL에서 변수를 사용하는 이유
+       변수는 데이터의 임시 저장 영역
+       저장된 값을 조작하기 위해 사용
+       저장된 값을 반복해서 재사용
+
+ - PL/SQL에서 사용될 변수의 규칙
+       반드시 문자로 시작해야 함
+       문자나 숫자, 특수문자를 포함할 수 있음
+       변수명은 30byte 이하여야 함
+       예약어를 포함하면 안됨
+
+ - 대입문으로 변수에 값 지정하기
+       변수명 := 값;
+           값을 대입할 때는 :=을 사용
+       SELECT 열이름 INTO 변수명 FROM 테이블;
+           테이블에 있는 열이름의 값을 변수명에 저장
+
+ - 변수는 PL/SQL 프로시저인 BEGIN ~ END 사이에서만 실행하는 순간에만 유지되며,
+       프로시저 실행이 종료되면 소멸
+
+ - SET SERVEROUTPUT ON;
+       DBMS_OUTPUT이 화면에 출력되기 위해 해준다.
+
+주요 변수들의 종류
+ - PL/SQL 변수
+       단순 변수
+           Scalar 변수
+           Reference 변수
+               %TYPE 변수
+               %ROWTYPE 변수
+       LOB
+       복합 변수
+           RECORD TYPE
+           TABLE TYPE
+
+ - 비 PL/SQL 변수
+       BIND 변수
+           
+단순 변수
+ - Scalar 변수
+       단일 값을 가지는 변수의 데이터 타입을 직접 지정해주는 변수
+           데이터 형은 SQL에서 사용하던 자료 타입과 거의 유사함
+       문법
+           변수명 [CONSTANT] 데이터타입 [NOT NULL] [:= | DEFAULT Expression];
+               CONSTANT
+                   읽기전용 변수, 상수로 선언하기 위한 키워드로 초기값이 반드시 지정되야 함
+               NOT NULL
+	       항상 값을 가지도록 제약을 주는 키워드
+                   초기값이 반드시 지정되야 함
+               := 또는 DEFAULT
+                   변수에 기본값(초기값)을 할당하기 위한 키워드
+               Expression
+	       변수에 부여할 기본값(초기값)
+                   다른 변수나 수식, 함수가 올 수 있음
+       예시
+           v_num NUMBER(5,3);
+               v_num에 숫자를 저장하는 변수로 총 5자리 중 3자리는 소수점(0.000)
+           v_name VARCHAR2(12) := '이지은';
+               v_name의 타입은 VARCHAR2이고 초기값으로 '이지은'을 줌
+       
+ - Reference 변수
+       데이터 형을 다른 칼럼에서 참조 후 지정하는 방식        
+           변수가 지정되어야 할 정확한 데이터 형태를 모를 경우 
+               해당 데이터가 들어 있는 칼럼의 정보를 참조
+       %TYPE 변수
+           이미 선언된 다른 변수나 칼럼의 데이터 타입을 이용하여 선언
+           테이블의 칼럼 데이터 타입을 모를 경우 사용
+           코딩이후 참조한 칼럼의 데이터 타입이 변경되어도 수정할 필요가 없음
+           예시
+               v_num 테이블A.칼럼B%TYPE
+                   테이블A의 칼럼B와 동일한 데이터형으로 변수 선언
+                       v_num의 데이터형과 크기는 칼럼B와 같다.
+
+       %ROWTYPE 변수
+           하나 이상의 데이터 값을 갖는 데이터 타입
+               배열과 비슷한 역할을 하고 재사용이 가능
+           테이블이나 뷰 내부의 칼럼 데이터형, 크기, 속성등을 그대로 사용
+           지정된 테이블의 구조와 동일한 구조를 갖는 변수를 선언하는 것
+           테이블의 칼럼 수나 타입을 알지 못할 경우 사용
+           테이블의 칼럼이 변경되어도 수정할 필요가 없음
+           테이블의 칼럼명도 그대로 가져온다.
+           예시
+           v_row 테이블A%ROWTYPE
+               테이블A의 여러 칼럼을 한꺼번에 저장할 변수로 선언
+                   ROWTYPE 변수는 하나의 테이블에 여러 칼럼의 값을 한꺼번에 저장할 수 있는 변수를 의미
+                       테이블A와 동일한 구조를 갖는 v_row가 생성
+                       테이블에 칼럼1, 칼럼2라는 칼럼이 존재하면
+                       v_row.칼럼1, v_row.칼럼2처럼 칼럼명은 그대로 가져옴
+
+ - 참고 : https://goalker.tistory.com/84
+           https://psh85a.tistory.com/entry/oracle-TYPE%EA%B3%BC-ROWTYPE
+               
+PL/SQL
+    DECLARE 변수 선언부, 옵션
+    BEGIN 로직 기술, 필수
+    EXCEPTION 예외처리, 옵션
+
+SELECT문
+    SELECT 칼럼명 INTO 변수명 FROM 테이블명 WHERE 조건;
+        테이블의 칼럼의 값을 변수명에 대입
+
+선택문
+    IF - THEN - END IF
+        IF (변수조건) THEN ········· 조건문
+            변수조건 예시 → 변수명 = 30
+        조건에 만족할 경우 실행되는 문장;
+        END IF;
+
+    IF - THEN - ELSE - END IF
+        IF (변수조건) THEN ········· 조건문
+        조건에 만족할 경우 실행되는 문장;
+        ELSE
+        조건에 만족하지 않을 경우 실행되는 문장;
+        END IF;
+
+    IF - THEN - ELSIF - ELSE - END IF
+        IF (변수조건) THEN ········· 조건문
+        조건에 만족할 경우 실행되는 문장;
+        ELSIF (변수조건) THEN ········· 조건문2
+        조건에 만족할 경우 실행되는 문장;
+        ELSE
+        조건에 만족하지 않을 경우 실행되는 문장;
+        END IF;
+
+반복문
+ - 반복문의 종류
+       BASIC LOOP문
+           조건 없이 반복 작업을 제공
+           LOOP
+               실행할 문장;
+               EXIT [WHERE 조건];
+           END LOOP
+
+       FOR LOOP문
+           COUNT를 기본으로 작업의 반복 제어를 제공
+           FOR index_counter
+               // index_counter
+                      upper_bound나 lower_bound에 도달할 때까지 반복함으로써
+                      1씩 자동적으로 증가하거나 감소되는 값을 가진 정수
+           IN [REVERSE] lower_bound..upper_bound LOOP
+               // REVERSE
+                      upper_bound에서 lower_bound까지 반복함으로써 인덱스가 1씩 감소
+               // lower_bound 
+	          index_counter 값의 범위에 대한 최소값을 지정
+               // upper_bound
+                      index_counter 값의 범위에 대한 최대값을 지정
+               실행할 문장;
+           END LOOP
+
+       WHILE LOOP문
+           조건을 기본으로 작업의 반복 제어를 제공
+           WHILE 조건 LOOP
+               실행할 문장;
+           END LOOP
+
+       EXIT문
+           LOOP를 종료
+
+ - BASIC LOOP문 예시
+       DECLARE 
+           N NUMBER := 1;
+       BEGIN
+           LOOP
+               DBMS_OUTPUT.PUT_LINE(N);
+               N := N+1;
+               IF (N>5) THEN
+                   EXIT;
+               END IF;
+           END LOOP;
+       END;
+       /
+
+ - FOR LOOP문 예시
+       DECLARE
+           SUM NUMBER := 0;
+       BEGIN
+           FOR N IN 1..100 LOOP
+               SUM := SUM + N;
+           END LOOP;
+           DBMS_OUTPUT.PUT_LINE(SUM);
+       END;
+       /
+
+ - WHILE LOOP문 예시
+       DECLARE
+           N NUMBER := 1;
+           TOTAL NUMBER := 0;
+       BEGIN
+           WHILE N<=5 LOOP
+               TOTAL := TOTAL+1;
+               N := N+1;
+               DBMS_OUTPUT.PUT_LINE(TOTAL);
+               DBMS_OUTPUT.PUT_LINE(N);
+           END LOOP;
+       END;
+       /
+
+저장 프로시저
+ - PL/SQL문을 저장해 놓는 공간
+       저장 프로시저를 실행하면 프로시저에 저장된 PL/SQL문이 실행되는 것 
+
+ - 저장 프로시저 생성하기
+       CREATE [OR REPLACE] 프로시저명
+           ( argument1 [mode] data_taye,
+             argument2 [mode] data_taye
+           )
+       IS 로컬변수
+       BEGIN
+           실행할 문장;
+       END;
+       /
+
+ - 저장 프로시저 실행하기
+       EXECUTE 프로시저명;
+
+ - 저장 프로시저 조회하기
+       SELECT * FROM USER_SOURCE WHERE NAME = '프로시저명';
+
+ - 저장 프로시저의 매개변수
+       CREATE OR REPLACE PROCEDURE 프로시저명(변수명 테이블.칼럼명%TYPE)
+       IS
+       BEGIN
+           실행할 문장;
+       END;
+       /
+       EXECUTE 프로시저명(매개변수);
+
+ - IN, OUT, INOUT 매개변수
+       프로시저를 생성할 때 매개변수의 3가지 MODE
+           DEFAULT는 IN
+       IN : 데이터를 전달 받을 때 사용
+                외부에서 들어오는 매개변수를 사용
+       OUT : 수행된 결과를 받아 갈 때 사용
+                   외부에서 입력한 매개변수에 값을 저장
+       INOUT : IN + OUT
+
+       ex) CREATE OR REPLACE PROCEDURE SEL_EMPNO(
+	    VEMPNO IN EMP.EMPNO%TYPE,
+    	    VENAME OUT EMP.ENAME%TYPE,
+	    VSAL OUT EMP.SAL%TYPE,
+	    VJOB OUT EMP.JOB%TYPE)
+           IS
+           BEGIN
+               SELECT ENAME, SAL, JOB INTO VENAME, VSAL, VJOB FROM EMP WHERE EMPNO = VEMPNO;
+           END;
+           /    
+
+          변수 선언
+               VARIABLE VAR_ENAME VARCHAR2(15);
+               VARIABLE VAR_SAL NUMBER;
+               VARIABLE VAR_JOB VARCHAR2(9);
+          저장 프로시저 실행
+              EXECUTE SEL_EMPNO(1001, :VAR_ENAME, :VAR_SAL, :VAR_JOB); 
+                  // :변수명
+                         선언된 변수를 사용한다는 의미
+          바운드 변수의 값을 출력
+              print var_ename
+              print var_sal
+              print var_job
+
+       IN으로 받은 매개변수는 프로시저 안에서 소비하는 것
+       OUT으로 받은 매개변수는 프로시저 안에서 결과를 얻어서
+           EXECUTE로 실행할 때 값을 리턴해주는 것     
+
+
 /*
  - SYSDATE : 년, 월, 일까지만 나옴
      SYSTIMESTAMP : 년, 월, 일, 시, 분, 초까지 나옴
@@ -1288,5 +1787,11 @@ Oracle 11g express edition 제한 사항
  - ROW_NUMBER : 로우에 순번을 매겨줌
 
  - ( )안에 작성하면 ( )안에 있는 식부터 처리한다.
+
+ - SHOW AUTOCOMMIT;
+       현재 autocommit의 상태를 보여줌
+
+ - SHOW USER
+       현재 사용중인(접속한) 계정을 보여줌
 
 */

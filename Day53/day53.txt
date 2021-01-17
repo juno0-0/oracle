@@ -1,0 +1,171 @@
+PL/SQL
+    DECLARE 변수 선언부, 옵션
+    BEGIN 로직 기술, 필수
+    EXCEPTION 예외처리, 옵션
+
+SELECT문
+    SELECT 칼럼명 INTO 변수명 FROM 테이블명 WHERE 조건;
+        테이블의 칼럼의 값을 변수명에 대입
+
+선택문
+    IF - THEN - END IF
+        IF (변수조건) THEN ········· 조건문
+            변수조건 예시 → 변수명 = 30
+        조건에 만족할 경우 실행되는 문장;
+        END IF;
+
+    IF - THEN - ELSE - END IF
+        IF (변수조건) THEN ········· 조건문
+        조건에 만족할 경우 실행되는 문장;
+        ELSE
+        조건에 만족하지 않을 경우 실행되는 문장;
+        END IF;
+
+    IF - THEN - ELSIF - ELSE - END IF
+        IF (변수조건) THEN ········· 조건문
+        조건에 만족할 경우 실행되는 문장;
+        ELSIF (변수조건) THEN ········· 조건문2
+        조건에 만족할 경우 실행되는 문장;
+        ELSE
+        조건에 만족하지 않을 경우 실행되는 문장;
+        END IF;
+
+반복문
+ - 반복문의 종류
+       BASIC LOOP문
+           조건 없이 반복 작업을 제공
+           LOOP
+               실행할 문장;
+               EXIT [WHERE 조건];
+           END LOOP
+
+       FOR LOOP문
+           COUNT를 기본으로 작업의 반복 제어를 제공
+           FOR index_counter
+               // index_counter
+                      upper_bound나 lower_bound에 도달할 때까지 반복함으로써
+                      1씩 자동적으로 증가하거나 감소되는 값을 가진 정수
+           IN [REVERSE] lower_bound..upper_bound LOOP
+               // REVERSE
+                      upper_bound에서 lower_bound까지 반복함으로써 인덱스가 1씩 감소
+               // lower_bound 
+	          index_counter 값의 범위에 대한 최소값을 지정
+               // upper_bound
+                      index_counter 값의 범위에 대한 최대값을 지정
+               실행할 문장;
+           END LOOP
+
+       WHILE LOOP문
+           조건을 기본으로 작업의 반복 제어를 제공
+           WHILE 조건 LOOP
+               실행할 문장;
+           END LOOP
+
+       EXIT문
+           LOOP를 종료
+
+ - BASIC LOOP문 예시
+       DECLARE 
+           N NUMBER := 1;
+       BEGIN
+           LOOP
+               DBMS_OUTPUT.PUT_LINE(N);
+               N := N+1;
+               IF (N>5) THEN
+                   EXIT;
+               END IF;
+           END LOOP;
+       END;
+       /
+
+ - FOR LOOP문 예시
+       DECLARE
+           SUM NUMBER := 0;
+       BEGIN
+           FOR N IN 1..100 LOOP
+               SUM := SUM + N;
+           END LOOP;
+           DBMS_OUTPUT.PUT_LINE(SUM);
+       END;
+       /
+
+ - WHILE LOOP문 예시
+       DECLARE
+           N NUMBER := 1;
+           TOTAL NUMBER := 0;
+       BEGIN
+           WHILE N<=5 LOOP
+               TOTAL := TOTAL+1;
+               N := N+1;
+               DBMS_OUTPUT.PUT_LINE(TOTAL);
+               DBMS_OUTPUT.PUT_LINE(N);
+           END LOOP;
+       END;
+       /
+
+저장 프로시저
+ - PL/SQL문을 저장해 놓는 공간
+       저장 프로시저를 실행하면 프로시저에 저장된 PL/SQL문이 실행되는 것 
+
+ - 저장 프로시저 생성하기
+       CREATE [OR REPLACE] 프로시저명
+           ( argument1 [mode] data_taye,
+             argument2 [mode] data_taye
+           )
+       IS 로컬변수
+       BEGIN
+           실행할 문장;
+       END;
+       /
+
+ - 저장 프로시저 실행하기
+       EXECUTE 프로시저명;
+
+ - 저장 프로시저 조회하기
+       SELECT * FROM USER_SOURCE WHERE NAME = '프로시저명';
+
+ - 저장 프로시저의 매개변수
+       CREATE OR REPLACE PROCEDURE 프로시저명(변수명 테이블.칼럼명%TYPE)
+       IS
+       BEGIN
+           실행할 문장;
+       END;
+       /
+       EXECUTE 프로시저명(매개변수);
+
+ - IN, OUT, INOUT 매개변수
+       프로시저를 생성할 때 매개변수의 3가지 MODE
+           DEFAULT는 IN
+       IN : 데이터를 전달 받을 때 사용
+                외부에서 들어오는 매개변수를 사용
+       OUT : 수행된 결과를 받아 갈 때 사용
+                   외부에서 입력한 매개변수에 값을 저장
+       INOUT : IN + OUT
+
+       ex) CREATE OR REPLACE PROCEDURE SEL_EMPNO(
+	    VEMPNO IN EMP.EMPNO%TYPE,
+    	    VENAME OUT EMP.ENAME%TYPE,
+	    VSAL OUT EMP.SAL%TYPE,
+	    VJOB OUT EMP.JOB%TYPE)
+           IS
+           BEGIN
+               SELECT ENAME, SAL, JOB INTO VENAME, VSAL, VJOB FROM EMP WHERE EMPNO = VEMPNO;
+           END;
+           /    
+
+          변수 선언
+               VARIABLE VAR_ENAME VARCHAR2(15);
+               VARIABLE VAR_SAL NUMBER;
+               VARIABLE VAR_JOB VARCHAR2(9);
+          저장 프로시저 실행
+              EXECUTE SEL_EMPNO(1001, :VAR_ENAME, :VAR_SAL, :VAR_JOB); 
+                  // :변수명
+                         선언된 변수를 사용한다는 의미
+          바운드 변수의 값을 출력
+              print var_ename
+              print var_sal
+              print var_job
+
+       IN으로 받은 매개변수는 프로시저 안에서 소비하는 것
+       OUT으로 받은 매개변수는 프로시저 안에서 결과를 얻어서
+           EXECUTE로 실행할 때 값을 리턴해주는 것     
