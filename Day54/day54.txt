@@ -1,0 +1,118 @@
+저장 프로시저를 사용하는 이유
+    클라이언트 응용프로그램에서 반복적으로 같은 처리를 할 경우
+        매번 같은 SQL문을 서버에 보내는 대신
+        미리 정의를 서버에 저장해 두고 클라이언트에서는 단순히 이 프로시저를
+        적당한 매개변수와 함께 호출만 해 주면 서버에서 
+        해당 프로시저의 정의를 읽어서 곧바로 실행하게 되는 것
+
+    저장 프로시저를 사용하면 클라이언트/서버 간 네트워크 트래픽이 줄어들어서
+        서버에서는 미리 복잡한 쿼리를 모아서 좀 더 실행하기 좋은 형식으로 관리할 수 있다.
+        즉 처리 속도가 빠르다
+     
+저장 함수
+ - 저장 프로시저와 거의 유사한 용도로 사용
+ - 차이점은 함수는 실행 결과를 되돌려 받을 수 있다는 점.
+ - CREATE [OR REPLACE] FUNCTION 저장함수명
+       (argument1 [mode] data_taye,
+        argument2 [mode] data_taye ...
+            //저장 함수의 매개변수
+        )
+       RETURN NUMBER
+           //저장 함수의 리턴 타입
+   IS
+       내부에서만 사용할 지역 변수를 선언
+   BEGIN
+       statement1;
+       statement2;
+           //실행할 문장
+       RETURN variable_name;
+           //실행 결과 리턴
+   END;
+
+ - 예시
+    1. 저장함수 만들기
+        CREATE OR REPLACE FUNCTION CAL_BONUS(
+            VEMPNO IN EMP.EMPNO%TYPE -- 매개변수
+        )
+        RETURN NUMBER -- 저장 함수의 리턴 타입
+        IS
+            VSAL NUMBER(7,2); -- 로컬 변수
+        BEGIN
+            SELECT SAL INTO VSAL FROM EMP WHERE EMPNO = VEMPNO; -- 실행할 문장
+            RETURN (VSAL*200); -- 실행 결과 리턴
+        END;
+        /
+    2. 바운드 변수 선언하기
+        VARIABLE var_res number;
+    3. 저장 함수 실행하기
+        EXECUTE :var_res := CAL_BONUS(1001);
+    4. 바운드 변수 출력하기
+        print var_res;
+    5. 저장함수를 호출하는 SQL문장
+        SELECT sal, CAL_BONUS(1001) FROM emp WHERE empno = 1001;
+
+커서
+ - 여러 개의 행으로 구해지는 SELECT문을 처리하기 위해 사용
+ - 자바의 Iterator와 비슷
+ - DECLARE
+       CURSOR 커서명 IS statement;
+           //커서 선언
+                 statement : 실행할 문장
+   BEGIN
+       OPEN 커서명
+           //커서 열기
+       FECTCH 커서명 INTO 변수명;
+           //커서로부터 데이터를 읽어와 변수에 저장
+       CLOSE 커서명;
+           //커서 닫기
+   END;
+   /
+
+ - DECLARE : 이름있는 SQL 영역 생성
+   OPEN : active set을 지정
+   FETCH : 현재 행을 READ하여 변수에 저장,
+                 결과 셋에서 로우 단위로 데이터를 읽어 들인다.
+   EMPTY : 처리할 행이 있는지 검사
+                  처리할 행이 있다면 FETCH를 반복
+   CLOSE : active set을 release(반환)
+
+ - 커서의 상태
+       %NOTFOUND
+           커서 영역의 자료가 모두 FETCH됐다면 TRUE
+       %FOUNT
+           커서 영역에 FETCH되지 않은 자료가 있다면 TRUE
+       %ISOPEN
+           커서가 OPEN된 상태면 TRUE
+       %ROWCOUNT 
+           커서가 얻어 온 레코드의 갯수
+
+ - 예시
+       CREATE OR REPLACE PROCEDURE CURSOR_SAMPLE01 
+       IS
+           VDEPT DEPT%ROWTYPE;
+           CURSOR  C1
+           IS
+               SELECT * FROM DEPT;
+       BEGIN
+           DBMS_OUTPUT.PUT_LINE('부서번호    부서명   지역명');
+           DBMS_OUTPUT.PUT_LINE('------------------------');
+   
+           OPEN C1;
+   
+           LOOP
+               FETCH  C1  INTO  VDEPT.DEPTNO, VDEPT.DNAME, VDEPT.LOC;
+               EXIT WHEN C1%NOTFOUND;
+   
+               DBMS_OUTPUT.PUT_LINE(VDEPT.DEPTNO ||  '   ' || VDEPT.DNAME || '     ' || VDEPT.LOC );
+           END LOOP;
+   
+           CLOSE C1;
+       END;
+       /
+
+ - OPEN~FETCH~CLOSE가 없이 FOR LOOP ~ END LOOP로 사용할 수 있다.
+       간단하게 커서를 처리할 수 있는 방법
+           FOR 변수명 IN 커서명 LOOP
+	   실행할 문장;
+               EXIT WHEN C1%NOTFOUND;
+           END LOOP;
